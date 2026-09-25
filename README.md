@@ -25,6 +25,7 @@ Same design pattern as WSL-Setup, just in shell instead of PowerShell:
   `apt` where available, falling back to `snap`
 - [Zellij](https://zellij.dev/) (`install-zellij.sh`) — via `snap` where
   available, falling back to a downloaded release binary
+- [Podman](https://podman.io/) (`install-podman.sh`) — via `apt`
 
 ## Usage
 
@@ -42,6 +43,7 @@ Or run steps individually:
 ./scripts/install-github-cli.sh
 ./scripts/install-helix.sh
 ./scripts/install-zellij.sh
+./scripts/install-podman.sh
 ```
 
 Re-running any script (or `install.sh` as a whole) is safe — already
@@ -59,4 +61,5 @@ scripts/
   install-github-cli.sh        # gh + gh copilot extension
   install-helix.sh
   install-zellij.sh
+  install-podman.sh
 ```

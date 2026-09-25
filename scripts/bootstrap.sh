@@ -12,6 +12,7 @@ STEPS=(
     "install-github-cli.sh"
     "install-helix.sh"
     "install-zellij.sh"
+    "install-podman.sh"
 )
 
 for step in "${STEPS[@]}"; do

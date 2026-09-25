@@ -41,11 +41,17 @@ else
     log_ok "GitHub CLI installed: $(gh --version | head -n1)"
 fi
 
-log_info "Checking gh copilot extension..."
-if gh extension list 2>/dev/null | grep -qi "gh-copilot"; then
+log_info "Checking GitHub Copilot CLI support..."
+if gh copilot --help >/dev/null 2>&1; then
+    # Recent gh versions (2.101+) bundle `copilot` as a built-in command
+    # that lazily downloads the standalone Copilot CLI on first real use.
+    # No separate extension is needed (and 'gh extension install
+    # github/gh-copilot' now fails with "matches a built-in command").
+    log_info "GitHub Copilot CLI available via the built-in 'gh copilot' command, skipping extension install."
+elif gh extension list 2>/dev/null | grep -qi "gh-copilot"; then
     log_info "gh copilot extension already installed, skipping."
 else
-    log_info "Installing gh copilot extension..."
+    log_info "Installing gh copilot extension (older gh version without built-in support)..."
     if ! gh extension install github/gh-copilot; then
         log_warn "Failed to install the gh copilot extension. You may need to run 'gh auth login' first, then re-run this script."
         exit 1
