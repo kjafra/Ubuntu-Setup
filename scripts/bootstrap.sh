@@ -13,6 +13,7 @@ STEPS=(
     "install-helix.sh"
     "install-zellij.sh"
     "install-podman.sh"
+    "install-delta.sh"
     "install-lazygit.sh"
     "install-lazydocker.sh"
     "install-zsh.sh"

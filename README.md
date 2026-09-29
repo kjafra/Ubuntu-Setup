@@ -26,6 +26,10 @@ Same design pattern as WSL-Setup, just in shell instead of PowerShell:
 - [Zellij](https://zellij.dev/) (`install-zellij.sh`) — via `snap` where
   available, falling back to a downloaded release binary
 - [Podman](https://podman.io/) (`install-podman.sh`) — via `apt`
+- [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) — via
+  `apt` where available (Ubuntu 24.04+/Debian 12+), falling back to a
+  downloaded release binary. Used as `core.pager` in the dotfiles-provided
+  `.gitconfig` for syntax-highlighted diffs in `git diff`/`git log`/lazygit.
 - [lazygit](https://github.com/jesseduffield/lazygit) (`install-lazygit.sh`)
   — via `apt` where available (Ubuntu 25.10+/Debian 13+), falling back to
   `go install`. This script only installs the binary; its default editor
@@ -80,6 +84,7 @@ Or run steps individually:
 ./scripts/install-helix.sh
 ./scripts/install-zellij.sh
 ./scripts/install-podman.sh
+./scripts/install-delta.sh
 ./scripts/install-lazygit.sh
 ./scripts/install-lazydocker.sh
 ./scripts/install-zsh.sh
@@ -102,6 +107,7 @@ scripts/
   install-helix.sh
   install-zellij.sh
   install-podman.sh
+  install-delta.sh              # git-delta (core.pager, config comes from the dotfiles checkout)
   install-lazygit.sh           # lazygit (config comes from the dotfiles checkout)
   install-lazydocker.sh        # lazydocker + rootless podman.socket wiring
   install-zsh.sh              # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting, login shell
