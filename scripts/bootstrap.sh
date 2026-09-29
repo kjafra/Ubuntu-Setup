@@ -13,6 +13,8 @@ STEPS=(
     "install-helix.sh"
     "install-zellij.sh"
     "install-podman.sh"
+    "install-lazygit.sh"
+    "install-lazydocker.sh"
 )
 
 for step in "${STEPS[@]}"; do

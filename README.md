@@ -26,6 +26,17 @@ Same design pattern as WSL-Setup, just in shell instead of PowerShell:
 - [Zellij](https://zellij.dev/) (`install-zellij.sh`) — via `snap` where
   available, falling back to a downloaded release binary
 - [Podman](https://podman.io/) (`install-podman.sh`) — via `apt`
+- [lazygit](https://github.com/jesseduffield/lazygit) (`install-lazygit.sh`)
+  — via `apt` where available (Ubuntu 25.10+/Debian 13+), falling back to
+  `go install`; configured to use the `helix (hx)` editor preset so it
+  opens files in Helix
+- [lazydocker](https://github.com/jesseduffield/lazydocker) (`install-lazydocker.sh`)
+  — not packaged for apt/snap and its `go install` path is currently broken
+  upstream, so it's installed via its own officially documented Linux
+  release-binary download (same pattern as Zellij); enables the rootless
+  `podman.socket` user service and points `DOCKER_HOST` at it (via a static
+  `/etc/profile.d/` file) so lazydocker talks to Podman's
+  Docker-API-compatible endpoint
 
 ## Usage
 
@@ -44,6 +55,8 @@ Or run steps individually:
 ./scripts/install-helix.sh
 ./scripts/install-zellij.sh
 ./scripts/install-podman.sh
+./scripts/install-lazygit.sh
+./scripts/install-lazydocker.sh
 ```
 
 Re-running any script (or `install.sh` as a whole) is safe — already
@@ -62,4 +75,6 @@ scripts/
   install-helix.sh
   install-zellij.sh
   install-podman.sh
+  install-lazygit.sh           # lazygit + helix (hx) as its default editor
+  install-lazydocker.sh        # lazydocker + rootless podman.socket wiring
 ```
