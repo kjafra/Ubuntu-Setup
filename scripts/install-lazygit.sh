@@ -1,38 +1,18 @@
 #!/usr/bin/env bash
-# Idempotently installs lazygit and configures it to use Helix (hx) as its
-# default editor.
+# Idempotently installs lazygit.
 #
 # Debian 13 / Ubuntu 25.10 and later ship lazygit in the apt archive, so we
 # try that first. Older releases fall back to `go install`, which still
 # resolves and verifies the module through the Go package proxy rather than
 # downloading a raw GitHub release binary by hand.
+#
+# This script only installs the binary. lazygit's editor preference (Helix)
+# is configured via ~/.config/lazygit/config.yml, which is deployed by the
+# dotfiles bare-repo checkout (see install-dotfiles.sh), not by this script.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
 source "$SCRIPT_DIR/common.sh"
-
-# lazygit ships a built-in "helix (hx)" editor preset that invokes the `hx`
-# binary, matching what install-helix.sh installs.
-configure_lazygit_editor() {
-    local config_dir="$HOME/.config/lazygit"
-    local config_file="$config_dir/config.yml"
-    mkdir -p "$config_dir"
-
-    if [[ -f "$config_file" ]] && grep -q '^\s*editPreset:' "$config_file"; then
-        log_info "lazygit editPreset already configured in $config_file, leaving as-is."
-        return 0
-    fi
-
-    if [[ ! -f "$config_file" ]]; then
-        cat > "$config_file" <<'EOF'
-os:
-  editPreset: "helix (hx)"
-EOF
-    else
-        printf '\nos:\n  editPreset: "helix (hx)"\n' >> "$config_file"
-    fi
-    log_ok "Configured lazygit to use helix (hx) as its default editor ($config_file)."
-}
 
 install_lazygit_via_go() {
     log_warn "lazygit is not available via apt on this release; falling back to 'go install'."
@@ -80,5 +60,3 @@ else
         exit 1
     fi
 fi
-
-configure_lazygit_editor

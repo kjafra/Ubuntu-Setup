@@ -15,6 +15,8 @@ STEPS=(
     "install-podman.sh"
     "install-lazygit.sh"
     "install-lazydocker.sh"
+    "install-zsh.sh"
+    "install-dotfiles.sh"
 )
 
 for step in "${STEPS[@]}"; do
