@@ -9,6 +9,7 @@ source "$SCRIPT_DIR/common.sh"
 STEPS=(
     "update-base-packages.sh"
     "install-git.sh"
+    "install-homebrew.sh"
     "install-github-cli.sh"
     "install-helix.sh"
     "install-zellij.sh"
@@ -20,9 +21,19 @@ STEPS=(
     "install-dotfiles.sh"
 )
 
+BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
+
 for step in "${STEPS[@]}"; do
     log_info "==> Running ${step}"
     "$SCRIPT_DIR/${step}"
+
+    # install-homebrew.sh puts brew on PATH for its own subprocess, but
+    # that doesn't propagate back to this script or later steps (each runs
+    # as its own subprocess) - re-source it here once brew exists so every
+    # later step can find `brew` on PATH without a fresh login shell.
+    if [[ "$step" == "install-homebrew.sh" && -x "$BREW_BIN" ]]; then
+        eval "$("$BREW_BIN" shellenv)"
+    fi
 done
 
 log_ok "Ubuntu setup complete."

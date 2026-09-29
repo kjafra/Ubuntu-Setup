@@ -39,3 +39,19 @@ apt_update_once() {
     fi
     touch "$marker"
 }
+
+# Ensures `brew` is callable in the current shell, even when this script is
+# run standalone in a shell that predates install-homebrew.sh's
+# /etc/profile.d/60-homebrew.sh (e.g. the same non-login shell that just
+# ran install-homebrew.sh for the first time). No-ops if brew is already on
+# PATH or isn't installed at all (the calling script's own install-homebrew
+# dependency check will report that).
+ensure_brew_on_path() {
+    if command_exists brew; then
+        return 0
+    fi
+    local brew_bin="/home/linuxbrew/.linuxbrew/bin/brew"
+    if [[ -x "$brew_bin" ]]; then
+        eval "$("$brew_bin" shellenv)"
+    fi
+}

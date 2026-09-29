@@ -17,38 +17,58 @@ Same design pattern as WSL-Setup, just in shell instead of PowerShell:
 
 ## What gets installed
 
-- Base `apt` package list/upgrade (`update-base-packages.sh`)
+Everything installs through **one** consistent package manager —
+[Homebrew](https://brew.sh/) (Linuxbrew) — except for the small handful of
+things `apt` is strictly required for: Homebrew's own Linux bootstrap
+dependencies, `git` (needed before Homebrew can even be installed), and
+rootless Podman's `newuidmap`/`newgidmap` binaries (setuid-root, so they
+have to come from the OS, not Homebrew). No tool install script falls back
+to `snap`, `go install`, or a downloaded release binary anymore — every
+tool in scope has an official Linux bottle on Homebrew.
+
+**apt (essentials only):**
+
+- Base package list/upgrade (`update-base-packages.sh`)
 - `git` (`install-git.sh`)
+- `build-essential procps curl file` — Homebrew's own Linux build
+  dependencies (`install-homebrew.sh`)
+- `uidmap` — provides `newuidmap`/`newgidmap`, required for rootless
+  Podman; a setuid-root package that can't come from Homebrew
+  (`install-podman.sh`)
+
+**Homebrew (everything else):**
+
+- Homebrew itself (`install-homebrew.sh`) — installs to
+  `/home/linuxbrew/.linuxbrew` and writes a static `/etc/profile.d/` file
+  so every future login shell has `brew` on `PATH`
 - GitHub CLI (`gh`) + the GitHub Copilot CLI extension (`gh copilot`)
   (`install-github-cli.sh`)
-- [Helix](https://helix-editor.com/) editor (`install-helix.sh`) — via
-  `apt` where available, falling back to `snap`
-- [Zellij](https://zellij.dev/) (`install-zellij.sh`) — via `snap` where
-  available, falling back to a downloaded release binary
-- [Podman](https://podman.io/) (`install-podman.sh`) — via `apt`
-- [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) — via
-  `apt` where available (Ubuntu 24.04+/Debian 12+), falling back to a
-  downloaded release binary. Used as `core.pager` in the dotfiles-provided
-  `.gitconfig` for syntax-highlighted diffs in `git diff`/`git log`/lazygit.
+- [Helix](https://helix-editor.com/) editor (`install-helix.sh`)
+- [Zellij](https://zellij.dev/) (`install-zellij.sh`)
+- [Podman](https://podman.io/) (`install-podman.sh`)
+- [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) —
+  used as `core.pager` in the dotfiles-provided `.gitconfig` for
+  syntax-highlighted diffs in `git diff`/`git log`/lazygit
 - [lazygit](https://github.com/jesseduffield/lazygit) (`install-lazygit.sh`)
-  — via `apt` where available (Ubuntu 25.10+/Debian 13+), falling back to
-  `go install`. This script only installs the binary; its default editor
-  (Helix) is configured via the dotfiles-deployed config, not by this
-  script.
-- [lazydocker](https://github.com/jesseduffield/lazydocker) (`install-lazydocker.sh`)
-  — not packaged for apt/snap and its `go install` path is currently broken
-  upstream, so it's installed via its own officially documented Linux
-  release-binary download (same pattern as Zellij); enables the rootless
-  `podman.socket` user service and points `DOCKER_HOST` at it (via a static
-  `/etc/profile.d/` file) so lazydocker talks to Podman's
-  Docker-API-compatible endpoint
+  — this script only installs the binary; its default editor (Helix) is
+  configured via the dotfiles-deployed config, not by this script
+- [lazydocker](https://github.com/jesseduffield/lazydocker)
+  (`install-lazydocker.sh`) — also starts Podman's Docker-API-compatible
+  service via `brew services start podman` (a Homebrew-managed systemd
+  **user** service, since Homebrew's podman formula doesn't ship apt's
+  socket-activation unit) and points `DOCKER_HOST` at its rootless socket
+  (via a static `/etc/profile.d/` file) so lazydocker can talk to it
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
-  (`install-zsh.sh`) — via `apt` where available, falling back to a git
-  clone of the upstream plugin repos or fzf's official install script; also
-  sets `zsh` as the login shell. Tools only — no shell config is written by
-  this script.
+  (`install-zsh.sh`) — also sets `zsh` as the login shell, registers its
+  path in `/etc/shells` (Homebrew's zsh isn't auto-registered the way
+  apt's is), and patches `/etc/zprofile` so zsh login shells actually read
+  `/etc/profile.d/*.sh` (Homebrew's vanilla zsh build doesn't source
+  `/etc/profile` on login the way Debian's patched apt zsh package does —
+  without this fix, Homebrew's own `PATH` wiring and Podman's `DOCKER_HOST`
+  wiring above would silently never take effect in a zsh login shell).
+  Tools only — no shell config is written by this script.
 - The [dotfiles](https://github.com/falwickster/dotfiles) bare-repo
   checkout (`install-dotfiles.sh`) — deploys `.zshrc`,
   `.config/lazygit/config.yml`, `.config/helix/config.toml`, and anything
@@ -80,6 +100,7 @@ Or run steps individually:
 ```bash
 ./scripts/update-base-packages.sh
 ./scripts/install-git.sh
+./scripts/install-homebrew.sh
 ./scripts/install-github-cli.sh
 ./scripts/install-helix.sh
 ./scripts/install-zellij.sh
@@ -91,6 +112,12 @@ Or run steps individually:
 ./scripts/install-dotfiles.sh
 ```
 
+If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
+run `install-homebrew.sh` first and then `eval "$(brew shellenv)"` (or open
+a new shell) before running the rest — otherwise later steps in the *same*
+shell won't see `brew` on `PATH` yet (`bootstrap.sh` handles this
+automatically).
+
 Re-running any script (or `install.sh` as a whole) is safe — already
 installed tools are detected and skipped.
 
@@ -100,17 +127,18 @@ installed tools are detected and skipped.
 install.sh                     # Entry point, delegates to scripts/bootstrap.sh
 scripts/
   bootstrap.sh                 # Runs every install script in order
-  common.sh                    # Shared helpers (logging, command/package checks, sudo hints)
+  common.sh                    # Shared helpers (logging, command/package checks, sudo hints, brew PATH)
   update-base-packages.sh      # apt-get update && apt-get upgrade
   install-git.sh
-  install-github-cli.sh        # gh + gh copilot extension
-  install-helix.sh
-  install-zellij.sh
-  install-podman.sh
-  install-delta.sh              # git-delta (core.pager, config comes from the dotfiles checkout)
-  install-lazygit.sh           # lazygit (config comes from the dotfiles checkout)
-  install-lazydocker.sh        # lazydocker + rootless podman.socket wiring
-  install-zsh.sh              # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting, login shell
+  install-homebrew.sh          # Homebrew (Linuxbrew) itself + its apt build deps + PATH wiring
+  install-github-cli.sh        # gh + gh copilot extension (brew)
+  install-helix.sh             # brew
+  install-zellij.sh            # brew
+  install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
+  install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
+  install-lazygit.sh           # lazygit (brew; config comes from the dotfiles checkout)
+  install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service
+  install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```
