@@ -13,7 +13,7 @@ STEPS=(
     "install-github-cli.sh"
     "install-helix.sh"
     "install-ripgrep.sh"
-    "install-zellij.sh"
+    "install-tmux.sh"
     "install-podman.sh"
     "install-delta.sh"
     "install-lazygit.sh"

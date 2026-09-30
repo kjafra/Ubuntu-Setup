@@ -44,7 +44,11 @@ tool in scope has an official Linux bottle on Homebrew.
 - GitHub CLI (`gh`) + the GitHub Copilot CLI extension (`gh copilot`)
   (`install-github-cli.sh`)
 - [Helix](https://helix-editor.com/) editor (`install-helix.sh`)
-- [Zellij](https://zellij.dev/) (`install-zellij.sh`)
+- [tmux](https://github.com/tmux/tmux) (`install-tmux.sh`) — this script
+  only installs the binary; visuals/behavior (translucent Omarchy-inspired
+  theme, default emacs-style keybindings, no plugins) come from the
+  dotfiles-provided `.config/tmux/tmux.conf`, and `.zshrc` auto-starts a
+  new tmux session on every interactive login shell
 - [Podman](https://podman.io/) (`install-podman.sh`)
 - [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) —
   used as `core.pager` in the dotfiles-provided `.gitconfig` for
@@ -71,11 +75,14 @@ tool in scope has an official Linux bottle on Homebrew.
   Tools only — no shell config is written by this script.
 - The [dotfiles](https://github.com/falwickster/dotfiles) bare-repo
   checkout (`install-dotfiles.sh`) — deploys `.zshrc`,
-  `.config/lazygit/config.yml`, `.config/helix/config.toml`, and anything
-  else in that repo into `$HOME`, mirroring the same experience as the
-  Windows PowerShell profile: fzf-powered `Ctrl+R` history search,
-  ghost-text history autosuggestions, Helix as the default editor for
-  lazygit/git, and a locked-down `dotfiles` shell function
+  `.config/lazygit/config.yml`, `.config/helix/config.toml`,
+  `.config/tmux/tmux.conf`, and anything else in that repo into `$HOME`,
+  mirroring the same experience as the Windows PowerShell profile:
+  fzf-powered `Ctrl+R` history search, ghost-text history autosuggestions,
+  Helix as the default editor for lazygit/git, a translucent
+  Omarchy-inspired tmux status bar/pane theme with tmux's stock
+  keybindings (auto-started as a new session on every interactive login
+  shell), and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
   updates
 
@@ -103,7 +110,7 @@ Or run steps individually:
 ./scripts/install-homebrew.sh
 ./scripts/install-github-cli.sh
 ./scripts/install-helix.sh
-./scripts/install-zellij.sh
+./scripts/install-tmux.sh
 ./scripts/install-podman.sh
 ./scripts/install-delta.sh
 ./scripts/install-lazygit.sh
@@ -133,7 +140,7 @@ scripts/
   install-homebrew.sh          # Homebrew (Linuxbrew) itself + its apt build deps + PATH wiring
   install-github-cli.sh        # gh + gh copilot extension (brew)
   install-helix.sh             # brew
-  install-zellij.sh            # brew
+  install-tmux.sh              # brew (config comes from the dotfiles checkout)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
   install-lazygit.sh           # lazygit (brew; config comes from the dotfiles checkout)
