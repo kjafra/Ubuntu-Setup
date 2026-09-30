@@ -62,6 +62,13 @@ tool in scope has an official Linux bottle on Homebrew.
   **user** service, since Homebrew's podman formula doesn't ship apt's
   socket-activation unit) and points `DOCKER_HOST` at its rootless socket
   (via a static `/etc/profile.d/` file) so lazydocker can talk to it
+- [Yazi](https://yazi-rs.github.io/) (`install-yazi.sh`) — this script
+  only installs the binary; the `y` cd-on-quit shell wrapper function
+  comes from the dotfiles-provided `.zshrc`
+- [eza](https://eza.rocks/) (`install-eza.sh`) — a prettier `ls`
+  replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
+  aliases (with icons and git-status columns) come from the
+  dotfiles-provided `.zshrc`
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -82,7 +89,9 @@ tool in scope has an official Linux bottle on Homebrew.
   Helix as the default editor for lazygit/git, a translucent
   Omarchy-inspired tmux status bar/pane theme with tmux's stock
   keybindings (auto-started as a new session on every interactive login
-  shell), and a locked-down `dotfiles` shell function
+  shell), `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
+  git-status columns, a `y` shell function that opens Yazi and `cd`s to
+  its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
   updates
 
@@ -115,6 +124,8 @@ Or run steps individually:
 ./scripts/install-delta.sh
 ./scripts/install-lazygit.sh
 ./scripts/install-lazydocker.sh
+./scripts/install-yazi.sh
+./scripts/install-eza.sh
 ./scripts/install-zsh.sh
 ./scripts/install-dotfiles.sh
 ```
@@ -145,6 +156,8 @@ scripts/
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
   install-lazygit.sh           # lazygit (brew; config comes from the dotfiles checkout)
   install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service
+  install-yazi.sh               # yazi (brew; `y` cd-on-quit wrapper comes from the dotfiles checkout)
+  install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)

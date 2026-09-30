@@ -18,6 +18,8 @@ STEPS=(
     "install-delta.sh"
     "install-lazygit.sh"
     "install-lazydocker.sh"
+    "install-yazi.sh"
+    "install-eza.sh"
     "install-zsh.sh"
     "install-dotfiles.sh"
 )
