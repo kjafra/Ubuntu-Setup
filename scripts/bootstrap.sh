@@ -12,6 +12,7 @@ STEPS=(
     "install-homebrew.sh"
     "install-github-cli.sh"
     "install-helix.sh"
+    "install-ripgrep.sh"
     "install-zellij.sh"
     "install-podman.sh"
     "install-delta.sh"
