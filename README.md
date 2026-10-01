@@ -69,6 +69,14 @@ tool in scope has an official Linux bottle on Homebrew.
   replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
   aliases (with icons and git-status columns) come from the
   dotfiles-provided `.zshrc`
+- [fastfetch](https://github.com/fastfetch-cli/fastfetch)
+  (`install-fastfetch.sh`) — this script only installs the binary; the
+  dotfiles-provided `.zshrc` runs it once per actual login shell (not on
+  every tmux pane) to print the distro ASCII logo + machine info (OS,
+  kernel, CPU, memory, disks, uptime, shell, etc.), immediately followed
+  by a live-checked list of any manual setup steps still outstanding (see
+  below) — printed before tmux auto-starts, since `exec tmux` replaces
+  the shell process and nothing after it would run
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -118,6 +126,28 @@ you) can author/commit/push new Linux-path config files without touching a
 live `$HOME` checkout. Deployment at runtime always goes through
 `install-dotfiles.sh`'s bare-repo checkout, not this submodule.
 
+## Login banner & manual-setup reminders
+
+Every interactive login shell (once per terminal, not per tmux pane)
+prints the `fastfetch` ASCII logo/machine-info banner, followed by a
+reminder for any of these one-time, interactive steps that nothing here
+can safely automate (credentials, network, or a TTY prompt are needed) and
+that haven't been done yet:
+
+- **GitHub CLI** not authenticated, or authenticated without the
+  `copilot`/`read:packages` scopes `copilot_here` needs
+- **Azure CLI** not authenticated (only checked if `az` is installed —
+  this repo doesn't install it)
+- **Podman's API service** not running (`brew services start podman`)
+- **Git identity** not set (`~/.gitconfig.local` missing — see
+  `.gitconfig.local.example`)
+
+Each check is live (re-evaluated every login, no "dismiss once" flag
+file), so a reminder disappears for good the moment its underlying
+condition is fixed, and network checks are capped with a short `timeout`
+so being offline never hangs shell startup. The checks themselves live in
+the dotfiles-provided `.zshrc`, not in a script here.
+
 ## Usage
 
 Run everything in one go:
@@ -141,6 +171,7 @@ Or run steps individually:
 ./scripts/install-lazydocker.sh
 ./scripts/install-yazi.sh
 ./scripts/install-eza.sh
+./scripts/install-fastfetch.sh
 ./scripts/install-zsh.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-copilot-here.sh
@@ -174,6 +205,7 @@ scripts/
   install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service
   install-yazi.sh               # yazi (brew; `y` cd-on-quit wrapper comes from the dotfiles checkout)
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
+  install-fastfetch.sh          # fastfetch (brew; login banner + manual-setup reminders come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper, runs last
