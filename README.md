@@ -94,6 +94,21 @@ tool in scope has an official Linux bottle on Homebrew.
   its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
   updates
+- [copilot_here](https://github.com/GordonBeeming/copilot_here)
+  (`install-copilot-here.sh`) — runs the GitHub Copilot CLI inside a
+  sandboxed container (Docker/OrbStack/Podman, auto-detected; our
+  rootless Podman install above is natively supported) with filesystem
+  access limited to the current directory, using the host's existing
+  `gh` credentials. This script only installs the `copilot_here` binary
+  and its shell-function wrappers (`copilot_here`/`copilot_yolo`) via
+  upstream's own official installer; the shell-integration marker block
+  it would otherwise inject at runtime is pre-seeded as tracked content
+  in the dotfiles-provided `.zshrc` instead, so it's always a no-op
+  rewrite. Runs last, after `install-dotfiles.sh`, so that tracked
+  `.zshrc` already exists before the installer touches it. Before first
+  use, `gh` must be authenticated with the `copilot` and `read:packages`
+  scopes (`gh auth refresh -h github.com -s copilot,read:packages`) —
+  not run automatically by this script.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -128,6 +143,7 @@ Or run steps individually:
 ./scripts/install-eza.sh
 ./scripts/install-zsh.sh
 ./scripts/install-dotfiles.sh
+./scripts/install-copilot-here.sh
 ```
 
 If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
@@ -160,5 +176,6 @@ scripts/
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
+  install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper, runs last
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```

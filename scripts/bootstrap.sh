@@ -22,6 +22,7 @@ STEPS=(
     "install-eza.sh"
     "install-zsh.sh"
     "install-dotfiles.sh"
+    "install-copilot-here.sh"
 )
 
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
