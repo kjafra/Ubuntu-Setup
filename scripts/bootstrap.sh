@@ -23,6 +23,7 @@ STEPS=(
     "install-fastfetch.sh"
     "install-zsh.sh"
     "install-dotfiles.sh"
+    "install-git-hooks.sh"
     "install-copilot-here.sh"
 )
 

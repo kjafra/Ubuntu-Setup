@@ -118,6 +118,11 @@ tool in scope has an official Linux bottle on Homebrew.
   use, `gh` must be authenticated with the `copilot` and `read:packages`
   scopes (`gh auth refresh -h github.com -s copilot,read:packages`) —
   not run automatically by this script.
+- A global git `commit-msg` hook (`install-git-hooks.sh`) that rejects any
+  commit crediting Copilot (or another AI assistant) as a co-author (see
+  [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
+  below). Runs after `install-dotfiles.sh`, since it points at the hook
+  script the dotfiles checkout deploys to `$HOME/.git-hooks/commit-msg`.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -161,6 +166,19 @@ encodings xterm-compatible terminals actually send), and
 modified-arrow sequences through to the shell unmangled instead of
 swallowing/mistranslating them.
 
+## Preventing AI co-author trailers
+
+`install-git-hooks.sh` sets git's **global** `core.hooksPath` (once per
+WSL user, the same way `user.name`/`user.email` are configured globally —
+not per-repo) to `$HOME/.git-hooks`, which the dotfiles checkout deploys a
+`commit-msg` hook into. That hook rejects any commit whose message
+contains a `Co-authored-by:` or `Signed-off-by:` trailer mentioning
+"copilot" (case-insensitive). Because it's global rather than per-repo,
+it applies to every repo in this distro, including ones cloned fresh
+later — not just the ones this setup touches directly. The matching
+Windows-side setup (`Install-GitHooks.ps1` in WSL-Setup) does the same for
+git on Windows, pointing at `%USERPROFILE%\.git-hooks` there instead.
+
 ## Usage
 
 Run everything in one go:
@@ -187,6 +205,7 @@ Or run steps individually:
 ./scripts/install-fastfetch.sh
 ./scripts/install-zsh.sh
 ./scripts/install-dotfiles.sh
+./scripts/install-git-hooks.sh
 ./scripts/install-copilot-here.sh
 ```
 
@@ -221,6 +240,7 @@ scripts/
   install-fastfetch.sh          # fastfetch (brew; login banner + manual-setup reminders come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
+  install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
   install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper, runs last
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```
