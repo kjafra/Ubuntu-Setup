@@ -75,8 +75,9 @@ tool in scope has an official Linux bottle on Homebrew.
   every tmux pane) to print the distro ASCII logo + machine info (OS,
   kernel, CPU, memory, disks, uptime, shell, etc.), immediately followed
   by a live-checked list of any manual setup steps still outstanding (see
-  below) — printed before tmux auto-starts, since `exec tmux` replaces
-  the shell process and nothing after it would run
+  below) — printed *inside* the first auto-started tmux pane (not
+  before), since `exec tmux` switches to tmux's own alternate screen and
+  would otherwise hide anything printed first
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -128,11 +129,14 @@ live `$HOME` checkout. Deployment at runtime always goes through
 
 ## Login banner & manual-setup reminders
 
-Every interactive login shell (once per terminal, not per tmux pane)
-prints the `fastfetch` ASCII logo/machine-info banner, followed by a
-reminder for any of these one-time, interactive steps that nothing here
-can safely automate (credentials, network, or a TTY prompt are needed) and
-that haven't been done yet:
+Every interactive login shell (once per terminal, not per tmux pane) prints
+the `fastfetch` ASCII logo/machine-info banner, followed by a reminder for
+any of these one-time, interactive steps that nothing here can safely
+automate (credentials, network, or a TTY prompt are needed) and that
+haven't been done yet. It runs *inside* the first tmux pane (not before
+`exec tmux`), since tmux switches to its own alternate screen the moment it
+takes over the terminal — printing beforehand would just be hidden the
+instant tmux starts:
 
 - **GitHub CLI** not authenticated, or authenticated without the
   `copilot`/`read:packages` scopes `copilot_here` needs
@@ -147,6 +151,15 @@ file), so a reminder disappears for good the moment its underlying
 condition is fixed, and network checks are capped with a short `timeout`
 so being offline never hangs shell startup. The checks themselves live in
 the dotfiles-provided `.zshrc`, not in a script here.
+
+## Keybindings: Ctrl+Left/Right word-jump
+
+The dotfiles-provided `.zshrc` binds Ctrl+Left/Right to zsh's
+`forward-word`/`backward-word` (covering the handful of escape-sequence
+encodings xterm-compatible terminals actually send), and
+`.config/tmux/tmux.conf` sets `xterm-keys on` so tmux forwards those
+modified-arrow sequences through to the shell unmangled instead of
+swallowing/mistranslating them.
 
 ## Usage
 
