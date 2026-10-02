@@ -22,9 +22,13 @@ STEPS=(
     "install-eza.sh"
     "install-fastfetch.sh"
     "install-zsh.sh"
+    "install-node.sh"
+    "install-azure-cli.sh"
     "install-dotfiles.sh"
     "install-git-hooks.sh"
     "install-copilot-here.sh"
+    "install-copilot-cli.sh"
+    "install-azure-devops-mcp.sh"
 )
 
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"

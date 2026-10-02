@@ -123,6 +123,38 @@ tool in scope has an official Linux bottle on Homebrew.
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
   below). Runs after `install-dotfiles.sh`, since it points at the hook
   script the dotfiles checkout deploys to `$HOME/.git-hooks/commit-msg`.
+- [Node.js](https://nodejs.org/) (`install-node.sh`) — only used for the
+  `npx`-launched MCP servers below; no app code or shell config depends
+  on it.
+- [Azure CLI](https://learn.microsoft.com/cli/azure/) (`install-azure-cli.sh`)
+  — this script only installs the `az` binary, it does **not** run
+  `az login` (interactive/credentialed — left to the login-banner
+  reminder below, same as the GitHub CLI's).
+- The standalone [GitHub Copilot CLI](https://github.com/github/copilot-cli)
+  (`install-copilot-cli.sh`, the `copilot` command) — unlike the `gh
+  copilot` built-in (`install-github-cli.sh`) or the sandboxed
+  `copilot_here` wrapper above, this is the full agentic CLI with MCP
+  server support (`/mcp`, `copilot mcp add`). No Linux Homebrew cask
+  exists for it, so — same pattern as `copilot_here` — this installs it
+  via GitHub's own official install script into `$HOME/.local/bin`. Runs
+  after `install-copilot-here.sh`. Requires `gh`/Copilot authentication
+  (via the in-app `/login` flow) before first use — not run automatically
+  by this script.
+- The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
+  (`install-azure-devops-mcp.sh`) — registers Microsoft's official
+  `@azure-devops/mcp` server with the Copilot CLI above
+  (`copilot mcp add azure-devops -- npx -y @azure-devops/mcp <org>
+  --authentication azcli`), so Copilot can query/manage Azure DevOps
+  projects, work items, repos, pipelines, and wikis. Authenticates by
+  reusing the host's existing `az login` session — no PAT or other
+  secret is ever generated or written to disk. Runs last, after
+  `install-node.sh` and `install-copilot-cli.sh`. The Azure DevOps
+  organization name is personal/machine-specific, so it's **not**
+  tracked in the dotfiles repo: copy
+  `dotfiles/.azure-devops.local.example` to `~/.azure-devops.local` and
+  fill in your org name before running this script (if that file is
+  missing, the script logs instructions and skips cleanly instead of
+  failing).
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -145,11 +177,13 @@ instant tmux starts:
 
 - **GitHub CLI** not authenticated, or authenticated without the
   `copilot`/`read:packages` scopes `copilot_here` needs
-- **Azure CLI** not authenticated (only checked if `az` is installed —
-  this repo doesn't install it)
+- **Azure CLI** not authenticated (only checked if `az` is installed)
 - **Podman's API service** not running (`brew services start podman`)
 - **Git identity** not set (`~/.gitconfig.local` missing — see
   `.gitconfig.local.example`)
+- **Azure DevOps org not configured** for the Copilot MCP server (only
+  checked if the standalone Copilot CLI is installed — see
+  `.azure-devops.local.example`)
 
 Each check is live (re-evaluated every login, no "dismiss once" flag
 file), so a reminder disappears for good the moment its underlying
@@ -204,9 +238,13 @@ Or run steps individually:
 ./scripts/install-eza.sh
 ./scripts/install-fastfetch.sh
 ./scripts/install-zsh.sh
+./scripts/install-node.sh
+./scripts/install-azure-cli.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-git-hooks.sh
 ./scripts/install-copilot-here.sh
+./scripts/install-copilot-cli.sh
+./scripts/install-azure-devops-mcp.sh
 ```
 
 If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
@@ -239,8 +277,12 @@ scripts/
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
   install-fastfetch.sh          # fastfetch (brew; login banner + manual-setup reminders come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
+  install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
+  install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
-  install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper, runs last
+  install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper
+  install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
+  install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```
