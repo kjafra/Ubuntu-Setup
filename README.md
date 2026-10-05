@@ -139,19 +139,22 @@ tool in scope has an official Linux bottle on Homebrew.
   by this script.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
   (`install-azure-devops-mcp.sh`) — registers Microsoft's official
-  `@azure-devops/mcp` server with the Copilot CLI above
-  (`copilot mcp add azure-devops -- npx -y @azure-devops/mcp <org>
-  --authentication azcli`), so Copilot can query/manage Azure DevOps
-  projects, work items, repos, pipelines, and wikis. Authenticates by
-  reusing the host's existing `az login` session — no PAT or other
-  secret is ever generated or written to disk. Runs last, after
-  `install-node.sh` and `install-copilot-cli.sh`. The Azure DevOps
-  organization name is personal/machine-specific, so it's **not**
-  tracked in the dotfiles repo: copy
+  `@azure-devops/mcp` server with the Copilot CLI above. **Supports
+  multiple orgs simultaneously**: every organization listed in
+  `~/.azure-devops.local` gets its own MCP server, named
+  `azure-devops-<org>` (e.g. `copilot mcp add azure-devops-contoso -- npx
+  -y @azure-devops/mcp contoso --authentication azcli`), so Copilot can
+  query/manage work items, repos, pipelines, and wikis across all of your
+  orgs at once — no switching required. Authenticates by reusing the
+  host's existing `az login` session — no PAT or other secret is ever
+  generated or written to disk. Runs last, after `install-node.sh` and
+  `install-copilot-cli.sh`. Org names are personal/machine-specific, so
+  they're **not** tracked in the dotfiles repo: copy
   `dotfiles/.azure-devops.local.example` to `~/.azure-devops.local` and
-  fill in your org name before running this script (if that file is
-  missing, the script logs instructions and skips cleanly instead of
-  failing).
+  list one org per line (if that file is missing or only has placeholder
+  org names, the script logs instructions and skips cleanly instead of
+  failing). Re-run the script after adding a new org — it only registers
+  orgs not already registered, so existing ones are left untouched.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -177,9 +180,11 @@ prompt are needed) and that haven't been done yet:
   [Podman's systemd user session on WSL](#podmans-systemd-user-session-on-wsl))
 - **Git identity** not set (`~/.gitconfig.local` missing — see
   `.gitconfig.local.example`)
-- **Azure DevOps org not configured** for the Copilot MCP server (only
-  checked if the standalone Copilot CLI is installed — see
-  `.azure-devops.local.example`)
+- **Azure DevOps org(s) not configured, or left as placeholder**, for
+  the Copilot MCP server (only checked if the standalone Copilot CLI is
+  installed — see `.azure-devops.local.example`; fires both when
+  `~/.azure-devops.local` is missing and when it still only contains
+  placeholder org names)
 
 Each check is live (re-evaluated every login, no "dismiss once" flag
 file), so a reminder disappears for good the moment its underlying
