@@ -47,8 +47,9 @@ tool in scope has an official Linux bottle on Homebrew.
 - [tmux](https://github.com/tmux/tmux) (`install-tmux.sh`) — this script
   only installs the binary; visuals/behavior (translucent Omarchy-inspired
   theme, default emacs-style keybindings, no plugins) come from the
-  dotfiles-provided `.config/tmux/tmux.conf`, and `.zshrc` auto-starts a
-  new tmux session on every interactive login shell
+  dotfiles-provided `.config/tmux/tmux.conf`. Run it manually with `tmux`
+  whenever you want it — it's not auto-started on login, and session
+  handling (detach, re-attach, kill) is tmux's own default behavior
 - [Podman](https://podman.io/) (`install-podman.sh`)
 - [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) —
   used as `core.pager` in the dotfiles-provided `.gitconfig` for
@@ -71,13 +72,10 @@ tool in scope has an official Linux bottle on Homebrew.
   dotfiles-provided `.zshrc`
 - [fastfetch](https://github.com/fastfetch-cli/fastfetch)
   (`install-fastfetch.sh`) — this script only installs the binary; the
-  dotfiles-provided `.zshrc` runs it once per actual login shell (not on
-  every tmux pane) to print the distro ASCII logo + machine info (OS,
-  kernel, CPU, memory, disks, uptime, shell, etc.), immediately followed
-  by a live-checked list of any manual setup steps still outstanding (see
-  below) — printed *inside* the first auto-started tmux pane (not
-  before), since `exec tmux` switches to tmux's own alternate screen and
-  would otherwise hide anything printed first
+  dotfiles-provided `.zshrc` runs it once per interactive login shell to
+  print the distro ASCII logo + machine info (OS, kernel, CPU, memory,
+  disks, uptime, shell, etc.), immediately followed by a live-checked list
+  of any manual setup steps still outstanding (see below)
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -97,8 +95,7 @@ tool in scope has an official Linux bottle on Homebrew.
   fzf-powered `Ctrl+R` history search, ghost-text history autosuggestions,
   Helix as the default editor for lazygit/git, a translucent
   Omarchy-inspired tmux status bar/pane theme with tmux's stock
-  keybindings (auto-started as a new session on every interactive login
-  shell), `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
+  keybindings, `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
   git-status columns, a `y` shell function that opens Yazi and `cd`s to
   its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
@@ -166,14 +163,10 @@ live `$HOME` checkout. Deployment at runtime always goes through
 
 ## Login banner & manual-setup reminders
 
-Every interactive login shell (once per terminal, not per tmux pane) prints
-the `fastfetch` ASCII logo/machine-info banner, followed by a reminder for
-any of these one-time, interactive steps that nothing here can safely
-automate (credentials, network, or a TTY prompt are needed) and that
-haven't been done yet. It runs *inside* the first tmux pane (not before
-`exec tmux`), since tmux switches to its own alternate screen the moment it
-takes over the terminal — printing beforehand would just be hidden the
-instant tmux starts:
+Every interactive login shell prints the `fastfetch` ASCII logo/machine-info
+banner, followed by a reminder for any of these one-time, interactive steps
+that nothing here can safely automate (credentials, network, or a TTY
+prompt are needed) and that haven't been done yet:
 
 - **GitHub CLI** not authenticated, or authenticated without the
   `copilot`/`read:packages` scopes `copilot_here` needs
