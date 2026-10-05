@@ -20,7 +20,6 @@ STEPS=(
     "install-lazydocker.sh"
     "install-yazi.sh"
     "install-eza.sh"
-    "install-fastfetch.sh"
     "install-zsh.sh"
     "install-node.sh"
     "install-azure-cli.sh"

@@ -70,12 +70,6 @@ tool in scope has an official Linux bottle on Homebrew.
   replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
   aliases (with icons and git-status columns) come from the
   dotfiles-provided `.zshrc`
-- [fastfetch](https://github.com/fastfetch-cli/fastfetch)
-  (`install-fastfetch.sh`) — this script only installs the binary; the
-  dotfiles-provided `.zshrc` runs it once per interactive login shell to
-  print the distro ASCII logo + machine info (OS, kernel, CPU, memory,
-  disks, uptime, shell, etc.), immediately followed by a live-checked list
-  of any manual setup steps still outstanding (see below)
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -121,7 +115,9 @@ tool in scope has an official Linux bottle on Homebrew.
   `--image mcr.microsoft.com/azure-functions/node:4-node20-core-tools`,
   Azure Functions Core Tools + Node 20 — compatibility with copilot_here's
   CLI injection is unverified), and `copilot_express_ts` (base image,
-  which already ships Node.js/npm).
+  which already ships Node.js/npm). It also defines `copilot_ado` /
+  `copilot_ado_yolo`, which expose the Azure DevOps MCP tools inside the
+  sandbox — see the bullet below for one-time setup.
 - A global git `commit-msg` hook (`install-git-hooks.sh`) that rejects any
   commit crediting Copilot (or another AI assistant) as a co-author (see
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
@@ -162,6 +158,40 @@ tool in scope has an official Linux bottle on Homebrew.
   org names, the script logs instructions and skips cleanly instead of
   failing). Re-run the script after adding a new org — it only registers
   orgs not already registered, so existing ones are left untouched.
+- **Azure DevOps MCP tools inside `copilot_here`** (`copilot_ado` /
+  `copilot_ado_yolo`, defined in the dotfiles-provided `.zshrc`) — the
+  host-side registration above uses `--authentication azcli`, which can't
+  work inside a sandboxed container (no `az` binary, no `~/.azure` token
+  cache in there). These two wrappers instead inject an
+  `--authentication pat`-based MCP config straight into the containerized
+  Copilot CLI session via `copilot_here`'s own
+  `--additional-mcp-config @<file>` flag — no mounting of `~/.copilot` or
+  `~/.azure` required. One-time setup, after `install-azure-devops-mcp.sh`
+  / `~/.azure-devops.local` are already configured:
+  1. `./scripts/set-azure-devops-pat-secret.sh` — prompts for an Azure
+     DevOps PAT and stores it (base64-encoded, per `@azure-devops/mcp`'s
+     `pat` auth requirement) as the Podman secret `azure-devops-pat`. The
+     PAT itself is expected to live in your own password manager (e.g.
+     KeePass on Windows) and is never written to disk or shell history by
+     this script — only piped into `podman secret create`. Re-run to
+     rotate.
+  2. `./scripts/generate-copilot-here-ado-mcp-config.sh` — reads the same
+     `~/.azure-devops.local` org list and writes
+     `~/.config/copilot_here/azure-devops-mcp.json` (one MCP server entry
+     per org, `--authentication pat`). Re-run whenever the org list
+     changes; the file is regenerated, not hand-edited.
+
+  Then use `copilot_ado` / `copilot_ado_yolo` instead of plain
+  `copilot_here` / `copilot_yolo` whenever you need Azure DevOps tools
+  inside the sandbox; they pass `SANDBOX_FLAGS="--secret
+  azure-devops-pat,type=env,target=PERSONAL_ACCESS_TOKEN"` so the PAT is
+  exposed to the container as an env var without ever being mounted or
+  written to a file. **Podman-only**: this relies on `podman run
+  --secret`, which plain Docker only supports under Swarm mode. **Does
+  not work with Airlock enabled** (`--enable-airlock`): Airlock converts
+  `SANDBOX_FLAGS` into a fixed Docker Compose subset
+  (`--env`/`--cap-add`/`--cap-drop`/`--ulimit`/`--memory`/`--cpus` only)
+  and silently drops unrecognized flags like `--secret`.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -173,10 +203,9 @@ live `$HOME` checkout. Deployment at runtime always goes through
 
 ## Login banner & manual-setup reminders
 
-Every interactive login shell prints the `fastfetch` ASCII logo/machine-info
-banner, followed by a reminder for any of these one-time, interactive steps
-that nothing here can safely automate (credentials, network, or a TTY
-prompt are needed) and that haven't been done yet:
+Every interactive login shell prints a reminder for any of these one-time,
+interactive steps that nothing here can safely automate (credentials,
+network, or a TTY prompt are needed) and that haven't been done yet:
 
 - **GitHub CLI** not authenticated, or authenticated without the
   `copilot`/`read:packages` scopes `copilot_here` needs
@@ -272,7 +301,6 @@ Or run steps individually:
 ./scripts/install-lazydocker.sh
 ./scripts/install-yazi.sh
 ./scripts/install-eza.sh
-./scripts/install-fastfetch.sh
 ./scripts/install-zsh.sh
 ./scripts/install-node.sh
 ./scripts/install-azure-cli.sh
@@ -281,6 +309,8 @@ Or run steps individually:
 ./scripts/install-copilot-here.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-azure-devops-mcp.sh
+./scripts/set-azure-devops-pat-secret.sh              # optional: enables Azure DevOps MCP tools inside copilot_here
+./scripts/generate-copilot-here-ado-mcp-config.sh     # optional: same, run after the PAT secret above
 ```
 
 If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
@@ -311,7 +341,6 @@ scripts/
   install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service
   install-yazi.sh               # yazi (brew; `y` cd-on-quit wrapper comes from the dotfiles checkout)
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
-  install-fastfetch.sh          # fastfetch (brew; login banner + manual-setup reminders come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
@@ -320,5 +349,7 @@ scripts/
   install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
+  set-azure-devops-pat-secret.sh               # optional, manual: stores an Azure DevOps PAT as a Podman secret for copilot_here
+  generate-copilot-here-ado-mcp-config.sh      # optional, manual: writes ~/.config/copilot_here/azure-devops-mcp.json from ~/.azure-devops.local
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```
