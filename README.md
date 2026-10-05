@@ -114,7 +114,14 @@ tool in scope has an official Linux bottle on Homebrew.
   `.zshrc` already exists before the installer touches it. Before first
   use, `gh` must be authenticated with the `copilot` and `read:packages`
   scopes (`gh auth refresh -h github.com -s copilot,read:packages`) —
-  not run automatically by this script.
+  not run automatically by this script. The dotfiles-provided `.zshrc`
+  also defines three project-type convenience wrappers around
+  `copilot_here` (plain shell functions, not part of upstream): `copilot_dotnet_api`
+  (`--dotnet` image, all of .NET 8/9/10 SDKs), `copilot_azfunc_ts` (custom
+  `--image mcr.microsoft.com/azure-functions/node:4-node20-core-tools`,
+  Azure Functions Core Tools + Node 20 — compatibility with copilot_here's
+  CLI injection is unverified), and `copilot_express_ts` (base image,
+  which already ships Node.js/npm).
 - A global git `commit-msg` hook (`install-git-hooks.sh`) that rejects any
   commit crediting Copilot (or another AI assistant) as a co-author (see
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
