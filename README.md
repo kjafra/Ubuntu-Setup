@@ -171,7 +171,10 @@ prompt are needed) and that haven't been done yet:
 - **GitHub CLI** not authenticated, or authenticated without the
   `copilot`/`read:packages` scopes `copilot_here` needs
 - **Azure CLI** not authenticated (only checked if `az` is installed)
-- **Podman's API service** not running (`brew services start podman`)
+- **Podman's API service** not running (`brew services start podman`;
+  if no systemd user session exists yet, the reminder instead walks
+  through enabling lingering and restarting WSL — see
+  [Podman's systemd user session on WSL](#podmans-systemd-user-session-on-wsl))
 - **Git identity** not set (`~/.gitconfig.local` missing — see
   `.gitconfig.local.example`)
 - **Azure DevOps org not configured** for the Copilot MCP server (only
@@ -183,6 +186,34 @@ file), so a reminder disappears for good the moment its underlying
 condition is fixed, and network checks are capped with a short `timeout`
 so being offline never hangs shell startup. The checks themselves live in
 the dotfiles-provided `.zshrc`, not in a script here.
+
+### Podman's systemd user session on WSL
+
+`brew services start podman` manages Podman's API service as a `systemd
+--user` unit, which needs a real login session (user D-Bus +
+`/run/user/<uid>`). WSL doesn't create one by default, so the command can
+fail with:
+
+```
+Failed to connect to user scope bus via local transport: No such file or directory
+Error: Failure while executing; `/usr/bin/env /usr/bin/systemctl --user daemon-reload` exited with 1.
+```
+
+Fix it once per machine:
+
+```bash
+sudo loginctl enable-linger $(whoami)
+```
+
+then, from Windows PowerShell, fully restart the WSL VM (a new
+terminal/tab is **not** enough — lingering only takes effect on the next
+VM boot):
+
+```powershell
+wsl --shutdown
+```
+
+Reopen the Ubuntu terminal and re-run `brew services start podman`.
 
 ## Keybindings: Ctrl+Left/Right word-jump
 
