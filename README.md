@@ -94,30 +94,6 @@ tool in scope has an official Linux bottle on Homebrew.
   its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
   updates
-- [copilot_here](https://github.com/GordonBeeming/copilot_here)
-  (`install-copilot-here.sh`) — runs the GitHub Copilot CLI inside a
-  sandboxed container (Docker/OrbStack/Podman, auto-detected; our
-  rootless Podman install above is natively supported) with filesystem
-  access limited to the current directory, using the host's existing
-  `gh` credentials. This script only installs the `copilot_here` binary
-  and its shell-function wrappers (`copilot_here`/`copilot_yolo`) via
-  upstream's own official installer; the shell-integration marker block
-  it would otherwise inject at runtime is pre-seeded as tracked content
-  in the dotfiles-provided `.zshrc` instead, so it's always a no-op
-  rewrite. Runs last, after `install-dotfiles.sh`, so that tracked
-  `.zshrc` already exists before the installer touches it. Before first
-  use, `gh` must be authenticated with the `copilot` and `read:packages`
-  scopes (`gh auth refresh -h github.com -s copilot,read:packages`) —
-  not run automatically by this script. The dotfiles-provided `.zshrc`
-  also defines three project-type convenience wrappers around
-  `copilot_here` (plain shell functions, not part of upstream): `copilot_dotnet_api`
-  (`--dotnet` image, all of .NET 8/9/10 SDKs), `copilot_azfunc_ts` (custom
-  `--image mcr.microsoft.com/azure-functions/node:4-node20-core-tools`,
-  Azure Functions Core Tools + Node 20 — compatibility with copilot_here's
-  CLI injection is unverified), and `copilot_express_ts` (base image,
-  which already ships Node.js/npm). It also defines `copilot_ado` /
-  `copilot_ado_yolo`, which expose the Azure DevOps MCP tools inside the
-  sandbox — see the bullet below for one-time setup.
 - A global git `commit-msg` hook (`install-git-hooks.sh`) that rejects any
   commit crediting Copilot (or another AI assistant) as a co-author (see
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
@@ -132,14 +108,13 @@ tool in scope has an official Linux bottle on Homebrew.
   reminder below, same as the GitHub CLI's).
 - The standalone [GitHub Copilot CLI](https://github.com/github/copilot-cli)
   (`install-copilot-cli.sh`, the `copilot` command) — unlike the `gh
-  copilot` built-in (`install-github-cli.sh`) or the sandboxed
-  `copilot_here` wrapper above, this is the full agentic CLI with MCP
-  server support (`/mcp`, `copilot mcp add`). No Linux Homebrew cask
-  exists for it, so — same pattern as `copilot_here` — this installs it
-  via GitHub's own official install script into `$HOME/.local/bin`. Runs
-  after `install-copilot-here.sh`. Requires `gh`/Copilot authentication
-  (via the in-app `/login` flow) before first use — not run automatically
-  by this script.
+  copilot` built-in (`install-github-cli.sh`), this is the full agentic
+  CLI with MCP server support (`/mcp`, `copilot mcp add`). No Linux
+  Homebrew cask exists for it, so this installs it via GitHub's own
+  official install script into `$HOME/.local/bin`. Runs after
+  `install-git-hooks.sh`. Requires `gh`/Copilot authentication (via the
+  in-app `/login` flow) before first use — not run automatically by this
+  script.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
   (`install-azure-devops-mcp.sh`) — registers Microsoft's official
   `@azure-devops/mcp` server with the Copilot CLI above. **Supports
@@ -158,40 +133,19 @@ tool in scope has an official Linux bottle on Homebrew.
   org names, the script logs instructions and skips cleanly instead of
   failing). Re-run the script after adding a new org — it only registers
   orgs not already registered, so existing ones are left untouched.
-- **Azure DevOps MCP tools inside `copilot_here`** (`copilot_ado` /
-  `copilot_ado_yolo`, defined in the dotfiles-provided `.zshrc`) — the
-  host-side registration above uses `--authentication azcli`, which can't
-  work inside a sandboxed container (no `az` binary, no `~/.azure` token
-  cache in there). These two wrappers instead inject an
-  `--authentication pat`-based MCP config straight into the containerized
-  Copilot CLI session via `copilot_here`'s own
-  `--additional-mcp-config @<file>` flag — no mounting of `~/.copilot` or
-  `~/.azure` required. One-time setup, after `install-azure-devops-mcp.sh`
-  / `~/.azure-devops.local` are already configured:
-  1. `./scripts/set-azure-devops-pat-secret.sh` — prompts for an Azure
-     DevOps PAT and stores it (base64-encoded, per `@azure-devops/mcp`'s
-     `pat` auth requirement) as the Podman secret `azure-devops-pat`. The
-     PAT itself is expected to live in your own password manager (e.g.
-     KeePass on Windows) and is never written to disk or shell history by
-     this script — only piped into `podman secret create`. Re-run to
-     rotate.
-  2. `./scripts/generate-copilot-here-ado-mcp-config.sh` — reads the same
-     `~/.azure-devops.local` org list and writes
-     `~/.config/copilot_here/azure-devops-mcp.json` (one MCP server entry
-     per org, `--authentication pat`). Re-run whenever the org list
-     changes; the file is regenerated, not hand-edited.
-
-  Then use `copilot_ado` / `copilot_ado_yolo` instead of plain
-  `copilot_here` / `copilot_yolo` whenever you need Azure DevOps tools
-  inside the sandbox; they pass `SANDBOX_FLAGS="--secret
-  azure-devops-pat,type=env,target=PERSONAL_ACCESS_TOKEN"` so the PAT is
-  exposed to the container as an env var without ever being mounted or
-  written to a file. **Podman-only**: this relies on `podman run
-  --secret`, which plain Docker only supports under Swarm mode. **Does
-  not work with Airlock enabled** (`--enable-airlock`): Airlock converts
-  `SANDBOX_FLAGS` into a fixed Docker Compose subset
-  (`--env`/`--cap-add`/`--cap-drop`/`--ulimit`/`--memory`/`--cpus` only)
-  and silently drops unrecognized flags like `--secret`.
+- **Azure DevOps PAT storage for future custom containers** — the
+  host-side registration above uses `--authentication azcli`, which only
+  works on the host (no `az` binary / `~/.azure` token cache inside a
+  container). For sandboxed/containerized use later (e.g. a custom Docker
+  image), store an Azure DevOps PAT as the Podman secret
+  `azure-devops-pat`: `podman secret create azure-devops-pat -` (paste the
+  PAT, then Ctrl-D; re-run to rotate). The PAT itself is expected to live
+  in your own password manager (e.g. KeePass on Windows) and is never
+  written to disk or shell history by this flow — only piped straight
+  into `podman secret create`. The login banner reminds you if this
+  secret isn't set yet (see below). There's no automation script for this
+  on purpose, and no specific encoding/consumer is assumed — that's
+  whatever the eventual custom image expects.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
@@ -207,13 +161,16 @@ Every interactive login shell prints a reminder for any of these one-time,
 interactive steps that nothing here can safely automate (credentials,
 network, or a TTY prompt are needed) and that haven't been done yet:
 
-- **GitHub CLI** not authenticated, or authenticated without the
-  `copilot`/`read:packages` scopes `copilot_here` needs
+- **GitHub CLI** not authenticated
 - **Azure CLI** not authenticated (only checked if `az` is installed)
 - **Podman's API service** not running (`brew services start podman`;
   if no systemd user session exists yet, the reminder instead walks
   through enabling lingering and restarting WSL — see
   [Podman's systemd user session on WSL](#podmans-systemd-user-session-on-wsl))
+- **Azure DevOps PAT not stored as a Podman secret** (only checked once
+  Podman's API service is confirmed running — see
+  [What gets installed](#what-gets-installed) above for the `podman
+  secret create azure-devops-pat -` command)
 - **Git identity** not set (`~/.gitconfig.local` missing — see
   `.gitconfig.local.example`)
 - **Azure DevOps org(s) not configured, or left as placeholder**, for
@@ -306,11 +263,8 @@ Or run steps individually:
 ./scripts/install-azure-cli.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-git-hooks.sh
-./scripts/install-copilot-here.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-azure-devops-mcp.sh
-./scripts/set-azure-devops-pat-secret.sh              # optional: enables Azure DevOps MCP tools inside copilot_here
-./scripts/generate-copilot-here-ado-mcp-config.sh     # optional: same, run after the PAT secret above
 ```
 
 If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
@@ -346,10 +300,7 @@ scripts/
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
-  install-copilot-here.sh      # copilot_here (brew-free; upstream's own installer) - sandboxed Copilot CLI wrapper
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
-  set-azure-devops-pat-secret.sh               # optional, manual: stores an Azure DevOps PAT as a Podman secret for copilot_here
-  generate-copilot-here-ado-mcp-config.sh      # optional, manual: writes ~/.config/copilot_here/azure-devops-mcp.json from ~/.azure-devops.local
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```

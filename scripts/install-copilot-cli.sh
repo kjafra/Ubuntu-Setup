@@ -2,14 +2,12 @@
 # Idempotently installs the standalone GitHub Copilot CLI (`copilot`,
 # npm package @github/copilot / github.com/github/copilot-cli) - the
 # full agentic CLI that supports MCP servers (`/mcp`, `copilot mcp add`,
-# etc.), unlike the older `gh copilot` built-in (install-github-cli.sh)
-# or the sandboxed `copilot_here` wrapper (install-copilot-here.sh).
+# etc.), unlike the older `gh copilot` built-in (install-github-cli.sh).
 #
 # There's no Homebrew cask for this on Linux (the official `copilot-cli`
-# cask is macOS-only), so - same pattern as install-copilot-here.sh -
-# this uses GitHub's own official install script. It defaults to
-# $HOME/.local/bin for a non-root user, which is already added to PATH by
-# the copilot_here block in the dotfiles-provided .zshrc.
+# cask is macOS-only), so this uses GitHub's own official install script.
+# It defaults to $HOME/.local/bin for a non-root user, which is already
+# added to PATH by the dotfiles-provided .zshrc.
 #
 # Requires `gh` to be authenticated (or the /login flow on first launch)
 # before first use - not run automatically by this script. MCP servers
