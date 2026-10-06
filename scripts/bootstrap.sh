@@ -27,6 +27,7 @@ STEPS=(
     "install-git-hooks.sh"
     "install-copilot-cli.sh"
     "install-azure-devops-mcp.sh"
+    "install-azure-devops-git-credentials.sh"
 )
 
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"

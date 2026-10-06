@@ -133,6 +133,37 @@ tool in scope has an official Linux bottle on Homebrew.
   org names, the script logs instructions and skips cleanly instead of
   failing). Re-run the script after adding a new org — it only registers
   orgs not already registered, so existing ones are left untouched.
+- **Azure DevOps git credentials** (`install-azure-devops-git-credentials.sh`)
+  — configures a git credential helper scoped *only* to `dev.azure.com`
+  (`credential.https://dev.azure.com.helper`), using
+  [Git Credential Manager](https://github.com/git-ecosystem/git-credential-manager)
+  (GCM), so `git clone`/`fetch`/`push` against Azure DevOps repos over
+  HTTPS authenticate without manually pasting a PAT every time. GitHub and
+  any other git host are untouched. This script is environment-aware and
+  never assumes Windows — the exact same script runs unmodified whether
+  or not Windows is present:
+  - **On WSL**: nothing is installed on the Linux side. Instead the
+    helper is pointed straight at the **Windows-side**
+    `git-credential-manager.exe` (shipped with Git for Windows, or a
+    standalone GCM-for-Windows install), found under `/mnt/c/...`. Git in
+    WSL transparently shells out to that Windows binary via WSL/Windows
+    interop for every credential request, so secrets are stored in the
+    real **Windows Credential Manager** (DPAPI-backed) — this is
+    Microsoft's own documented WSL setup for GCM. If neither Git for
+    Windows nor standalone GCM is found yet, the script logs instructions
+    and skips cleanly; the login banner nags until it's resolved (see
+    below).
+  - **On non-WSL Linux** (e.g. a future Fedora Silverblue distrobox, no
+    Windows at all): installs the native Linux GCM binary via the
+    existing Homebrew/linuxbrew tooling (`brew install --cask
+    git-credential-manager` — the cask has a genuine Linux variant) and
+    points the helper at that local binary instead. GCM auto-picks its
+    own Linux-native secure store (Secret Service/libsecret, or its own
+    gpg-backed cache) — nothing is forced, and Windows Credential Manager
+    is never a hard dependency of this script or the repo.
+
+  Runs last, after `install-azure-devops-mcp.sh`. Idempotent: skips if the
+  helper is already configured to the detected path.
 - **Azure DevOps PAT storage for future custom containers** — the
   host-side registration above uses `--authentication azcli`, which only
   works on the host (no `az` binary / `~/.azure` token cache inside a
@@ -173,6 +204,11 @@ network, or a TTY prompt are needed) and that haven't been done yet:
   secret create azure-devops-pat -` command)
 - **Git identity** not set (`~/.gitconfig.local` missing — see
   `.gitconfig.local.example`)
+- **Azure DevOps git credentials not configured** (WSL only — only
+  checked when running under WSL; fires if Git for Windows/standalone
+  GCM for Windows wasn't found yet when
+  `install-azure-devops-git-credentials.sh` last ran — see [What gets
+  installed](#what-gets-installed) above)
 - **Azure DevOps org(s) not configured, or left as placeholder**, for
   the Copilot MCP server (only checked if the standalone Copilot CLI is
   installed — see `.azure-devops.local.example`; fires both when
@@ -265,6 +301,7 @@ Or run steps individually:
 ./scripts/install-git-hooks.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-azure-devops-mcp.sh
+./scripts/install-azure-devops-git-credentials.sh
 ```
 
 If you run steps individually rather than via `bootstrap.sh`/`install.sh`,
@@ -302,5 +339,6 @@ scripts/
   install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
+  install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (GCM): Windows Credential Manager on WSL, native Linux GCM otherwise
 dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
 ```
