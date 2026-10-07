@@ -23,6 +23,7 @@ STEPS=(
     "install-zsh.sh"
     "install-node.sh"
     "install-dotnet.sh"
+    "install-language-servers.sh"
     "install-azure-cli.sh"
     "install-dotfiles.sh"
     "install-git-hooks.sh"
