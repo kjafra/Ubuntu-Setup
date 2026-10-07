@@ -22,6 +22,7 @@ STEPS=(
     "install-eza.sh"
     "install-zsh.sh"
     "install-node.sh"
+    "install-dotnet.sh"
     "install-azure-cli.sh"
     "install-dotfiles.sh"
     "install-git-hooks.sh"

@@ -102,6 +102,10 @@ tool in scope has an official Linux bottle on Homebrew.
 - [Node.js](https://nodejs.org/) (`install-node.sh`) — only used for the
   `npx`-launched MCP servers below; no app code or shell config depends
   on it.
+- [.NET 10 SDK](https://dotnet.microsoft.com/) (`install-dotnet.sh`) — the
+  Homebrew `dotnet` formula is aka'd `dotnet@10` upstream (tracks the .NET
+  10 channel); also writes `DOTNET_ROOT` via a static `/etc/profile.d/`
+  file, same pattern as Podman's `DOCKER_HOST` above.
 - [Azure CLI](https://learn.microsoft.com/cli/azure/) (`install-azure-cli.sh`)
   — this script only installs the `az` binary, it does **not** run
   `az login` (interactive/credentialed — left to the login-banner
@@ -296,6 +300,7 @@ Or run steps individually:
 ./scripts/install-eza.sh
 ./scripts/install-zsh.sh
 ./scripts/install-node.sh
+./scripts/install-dotnet.sh
 ./scripts/install-azure-cli.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-git-hooks.sh
@@ -334,6 +339,7 @@ scripts/
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
+  install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
