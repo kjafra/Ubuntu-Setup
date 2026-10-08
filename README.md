@@ -172,6 +172,17 @@ tool in scope has an official Linux bottle on Homebrew.
 
   Runs last, after `install-azure-devops-mcp.sh`. Idempotent: skips if the
   helper is already configured to the detected path.
+- **Azure Artifacts NuGet credential provider**
+  (`install-nuget-credential-provider.sh`) — installs Microsoft's
+  [Artifacts Credential Provider](https://github.com/microsoft/artifacts-credprovider)
+  into `~/.nuget/plugins/netcore` (plus `jq`) so `dotnet restore` can
+  authenticate to private Azure DevOps NuGet feeds. The dotfiles
+  `.zshrc` exports `VSS_NUGET_EXTERNAL_FEED_ENDPOINTS` in each
+  interactive shell, with the PAT read from the `azure-devops-pat` Podman
+  secret (below) and one `https://pkgs.dev.azure.com/<org>/` endpoint per
+  org in `~/.azure-devops.local` (username `VssSessionToken`). The PAT
+  needs the *Packaging → Read* scope. Nothing is written to disk. Runs
+  last, after `install-azure-devops-git-credentials.sh`.
 - **Azure DevOps PAT storage for future custom containers** — the
   host-side registration above uses `--authentication azcli`, which only
   works on the host (no `az` binary / `~/.azure` token cache inside a
@@ -346,6 +357,7 @@ scripts/
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
   install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
+  install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command

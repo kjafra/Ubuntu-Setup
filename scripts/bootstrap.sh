@@ -31,6 +31,7 @@ STEPS=(
     "install-copilot-cli.sh"
     "install-azure-devops-mcp.sh"
     "install-azure-devops-git-credentials.sh"
+    "install-nuget-credential-provider.sh"
 )
 
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
