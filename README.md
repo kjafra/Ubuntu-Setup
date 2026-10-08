@@ -70,6 +70,10 @@ tool in scope has an official Linux bottle on Homebrew.
   replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
   aliases (with icons and git-status columns) come from the
   dotfiles-provided `.zshrc`
+- [fd](https://github.com/sharkdp/fd) (`install-fd.sh`) — fast file finder;
+  the dotfiles `.zshrc` uses it as fzf's file source, so `Ctrl+T` fuzzy-picks
+  files and `Alt+C` fuzzy-`cd`s (both `.gitignore`-aware). Also usable
+  directly: `fd <pattern>`
 - `zsh` + [fzf](https://github.com/junegunn/fzf) +
   [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) +
   [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting)
@@ -330,6 +334,7 @@ scripts/
   install-homebrew.sh          # Homebrew (Linuxbrew) itself + its apt build deps + PATH wiring
   install-github-cli.sh        # gh + gh copilot extension (brew)
   install-helix.sh             # brew
+  install-fd.sh                # fd (brew; used by the dotfiles .zshrc as fzf's file source for Ctrl+T / Alt+C)
   install-tmux.sh              # brew (config comes from the dotfiles checkout)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
