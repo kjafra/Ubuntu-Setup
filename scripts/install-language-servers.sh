@@ -19,6 +19,7 @@ if ! command_exists npm; then
 fi
 
 # csharp-ls (C#) - installed as a dotnet global tool.
+export PATH="$HOME/.dotnet/tools:$PATH"
 if command_exists csharp-ls; then
     log_info "csharp-ls already installed, skipping."
 else
@@ -47,6 +48,11 @@ EOF
     sudo chmod 644 "$dotnet_tools_profile"
 fi
 export PATH="$HOME/.dotnet/tools:$PATH"
+
+# /etc/profile.d is not read by zsh or non-login processes (editors, agents),
+# so also expose csharp-ls via ~/.local/bin, which the dotfiles put on PATH.
+mkdir -p "$HOME/.local/bin"
+ln -sf "$HOME/.dotnet/tools/csharp-ls" "$HOME/.local/bin/csharp-ls"
 
 # typescript-language-server + typescript (TypeScript/JavaScript).
 if command_exists typescript-language-server; then
