@@ -6,8 +6,8 @@
 #
 # No secret is handled here. The dotfiles .zshrc exports
 # VSS_NUGET_EXTERNAL_FEED_ENDPOINTS per shell from the `azure-devops-pat`
-# Podman secret and the orgs in ~/.azure-devops.local, which the provider
-# reads to authenticate with that PAT.
+# Podman secret and the feed URLs in the user-level NuGet.Config, which the
+# provider reads to authenticate with that PAT.
 #
 # Requires the .NET SDK (install-dotnet.sh) and jq (via the dotfiles .zshrc).
 set -euo pipefail
