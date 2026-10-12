@@ -51,9 +51,11 @@ tool in scope has an official Linux bottle on Homebrew.
   whenever you want it — it's not auto-started on login, and session
   handling (detach, re-attach, kill) is tmux's own default behavior
 - [Podman](https://podman.io/) (`install-podman.sh`)
+- [podman-compose](https://github.com/containers/podman-compose)
+  (`install-podman-compose.sh`) — compose provider for `podman compose`
 - [git-delta](https://github.com/dandavison/delta) (`install-delta.sh`) —
   used as `core.pager` in the dotfiles-provided `.gitconfig` for
-  syntax-highlighted diffs in `git diff`/`git log`/lazygit
+  syntax-highlighted diffs in `git diff`/`git log`, and as lazygit's diff pager
 - [lazygit](https://github.com/jesseduffield/lazygit) (`install-lazygit.sh`)
   — this script only installs the binary; its default editor (Helix) is
   configured via the dotfiles-deployed config, not by this script
@@ -65,7 +67,8 @@ tool in scope has an official Linux bottle on Homebrew.
   (via a static `/etc/profile.d/` file) so lazydocker can talk to it
 - [Yazi](https://yazi-rs.github.io/) (`install-yazi.sh`) — this script
   only installs the binary; the `y` cd-on-quit shell wrapper function
-  comes from the dotfiles-provided `.zshrc`
+  comes from the dotfiles-provided `.zshrc`; Helix is its configured editor
+  (`.config/yazi/yazi.toml`)
 - [eza](https://eza.rocks/) (`install-eza.sh`) — a prettier `ls`
   replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
   aliases (with icons and git-status columns) come from the
@@ -91,7 +94,7 @@ tool in scope has an official Linux bottle on Homebrew.
   `.config/tmux/tmux.conf`, and anything else in that repo into `$HOME`,
   mirroring the same experience as the Windows PowerShell profile:
   fzf-powered `Ctrl+R` history search, ghost-text history autosuggestions,
-  Helix as the default editor for lazygit/git, a translucent
+  Helix as the default editor (`$EDITOR`/`$VISUAL`, so also Copilot CLI's prompt editor) for lazygit/git, a translucent
   Omarchy-inspired tmux status bar/pane theme with tmux's stock
   keybindings, `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
   git-status columns, a `y` shell function that opens Yazi and `cd`s to
@@ -287,6 +290,7 @@ Or run steps individually:
 ./scripts/install-helix.sh
 ./scripts/install-tmux.sh
 ./scripts/install-podman.sh
+./scripts/install-podman-compose.sh
 ./scripts/install-delta.sh
 ./scripts/install-lazygit.sh
 ./scripts/install-lazydocker.sh
@@ -327,6 +331,7 @@ scripts/
   install-fd.sh                # fd (brew; used by the dotfiles .zshrc as fzf's file source for Ctrl+T / Alt+C)
   install-tmux.sh              # brew (config comes from the dotfiles checkout)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
+  install-podman-compose.sh    # podman-compose (brew)
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
   install-lazygit.sh           # lazygit (brew; config comes from the dotfiles checkout)
   install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service

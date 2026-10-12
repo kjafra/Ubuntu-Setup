@@ -16,6 +16,7 @@ STEPS=(
     "install-fd.sh"
     "install-tmux.sh"
     "install-podman.sh"
+    "install-podman-compose.sh"
     "install-delta.sh"
     "install-lazygit.sh"
     "install-lazydocker.sh"
