@@ -35,6 +35,10 @@ tool in scope has an official Linux bottle on Homebrew.
 - `uidmap` — provides `newuidmap`/`newgidmap`, required for rootless
   Podman; a setuid-root package that can't come from Homebrew
   (`install-podman.sh`)
+- `nftables` + `iptables` — firewall tools for Podman's netavark network
+  backend (without `nft`, `podman compose up` fails with "unable to execute
+  nft"); the driver is selected in the dotfiles-provided
+  `.config/containers/containers.conf` (`install-firewall-tools.sh`)
 
 **Homebrew (everything else):**
 
@@ -330,6 +334,7 @@ scripts/
   install-helix.sh             # brew
   install-fd.sh                # fd (brew; used by the dotfiles .zshrc as fzf's file source for Ctrl+T / Alt+C)
   install-tmux.sh              # brew (config comes from the dotfiles checkout)
+  install-firewall-tools.sh    # apt nftables + iptables (netavark firewall backends)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
   install-podman-compose.sh    # podman-compose (brew)
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)

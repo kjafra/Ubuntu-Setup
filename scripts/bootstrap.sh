@@ -15,6 +15,7 @@ STEPS=(
     "install-ripgrep.sh"
     "install-fd.sh"
     "install-tmux.sh"
+    "install-firewall-tools.sh"
     "install-podman.sh"
     "install-podman-compose.sh"
     "install-delta.sh"
