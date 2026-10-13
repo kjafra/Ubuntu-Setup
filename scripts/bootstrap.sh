@@ -29,7 +29,6 @@ STEPS=(
     "install-language-servers.sh"
     "install-azure-cli.sh"
     "install-dotfiles.sh"
-    "install-git-hooks.sh"
     "install-copilot-cli.sh"
     "install-azure-devops-mcp.sh"
     "install-azure-devops-git-credentials.sh"

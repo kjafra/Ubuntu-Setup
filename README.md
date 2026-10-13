@@ -105,11 +105,11 @@ tool in scope has an official Linux bottle on Homebrew.
   its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
   updates
-- A global git `commit-msg` hook (`install-git-hooks.sh`) that rejects any
-  commit crediting Copilot (or another AI assistant) as a co-author (see
+- A global git `commit-msg` hook that rejects any commit crediting
+  Copilot (or another AI assistant) as a co-author (see
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
-  below). Runs after `install-dotfiles.sh`, since it points at the hook
-  script the dotfiles checkout deploys to `$HOME/.git-hooks/commit-msg`.
+  below). Deployed to `$HOME/.git-hooks/commit-msg` by the dotfiles
+  checkout (`install-dotfiles.sh`).
 - [Node.js](https://nodejs.org/) (`install-node.sh`) — only used for the
   `npx`-launched MCP servers below; no app code or shell config depends
   on it.
@@ -126,8 +126,7 @@ tool in scope has an official Linux bottle on Homebrew.
   copilot` built-in (`install-github-cli.sh`), this is the full agentic
   CLI with MCP server support (`/mcp`, `copilot mcp add`). No Linux
   Homebrew cask exists for it, so this installs it via GitHub's own
-  official install script into `$HOME/.local/bin`. Runs after
-  `install-git-hooks.sh`. Requires `gh`/Copilot authentication (via the
+  official install script into `$HOME/.local/bin`. Requires `gh`/Copilot authentication (via the
   in-app `/login` flow) before first use — not run automatically by this
   script.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
@@ -265,16 +264,14 @@ swallowing/mistranslating them.
 
 ## Preventing AI co-author trailers
 
-`install-git-hooks.sh` sets git's **global** `core.hooksPath` (once per
-WSL user, the same way `user.name`/`user.email` are configured globally —
-not per-repo) to `$HOME/.git-hooks`, which the dotfiles checkout deploys a
-`commit-msg` hook into. That hook rejects any commit whose message
-contains a `Co-authored-by:` or `Signed-off-by:` trailer mentioning
-"copilot" (case-insensitive). Because it's global rather than per-repo,
-it applies to every repo in this distro, including ones cloned fresh
-later — not just the ones this setup touches directly. The matching
-Windows-side setup (`Install-GitHooks.ps1` in WSL-Setup) does the same for
-git on Windows, pointing at `%USERPROFILE%\.git-hooks` there instead.
+The dotfiles' tracked `.gitconfig` sets git's global
+`core.hooksPath = ~/.git-hooks`, and the dotfiles checkout deploys a
+`commit-msg` hook there; no install script is involved. That hook rejects
+any commit whose message contains a `Co-authored-by:` or `Signed-off-by:`
+trailer mentioning "copilot" (case-insensitive). Because it's global
+rather than per-repo, it applies to every repo in this distro, including
+ones cloned fresh later. Windows uses the same tracked `.gitconfig`, where
+`~` resolves to `%USERPROFILE%`.
 
 ## Usage
 
@@ -305,7 +302,6 @@ Or run steps individually:
 ./scripts/install-dotnet.sh
 ./scripts/install-azure-cli.sh
 ./scripts/install-dotfiles.sh
-./scripts/install-git-hooks.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-azure-devops-mcp.sh
 ./scripts/install-azure-devops-git-credentials.sh
@@ -348,7 +344,6 @@ scripts/
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
-  install-git-hooks.sh         # Points global git core.hooksPath at the dotfiles-deployed commit-msg hook
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
