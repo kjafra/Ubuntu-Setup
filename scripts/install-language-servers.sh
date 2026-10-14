@@ -13,7 +13,7 @@ if ! command_exists dotnet; then
     log_err "dotnet not found on PATH. Run install-dotnet.sh first."
     exit 1
 fi
-if ! command_exists npm; then
+if ! linux_command_exists npm; then
     log_err "npm not found on PATH. Run install-node.sh first."
     exit 1
 fi
@@ -55,7 +55,7 @@ mkdir -p "$HOME/.local/bin"
 ln -sf "$HOME/.dotnet/tools/csharp-ls" "$HOME/.local/bin/csharp-ls"
 
 # typescript-language-server + typescript (TypeScript/JavaScript).
-if command_exists typescript-language-server; then
+if linux_command_exists typescript-language-server; then
     log_info "typescript-language-server already installed, skipping."
 else
     log_info "Installing typescript-language-server via npm..."
@@ -67,7 +67,7 @@ else
 fi
 
 # yaml-language-server (YAML).
-if command_exists yaml-language-server; then
+if linux_command_exists yaml-language-server; then
     log_info "yaml-language-server already installed, skipping."
 else
     log_info "Installing yaml-language-server via npm..."

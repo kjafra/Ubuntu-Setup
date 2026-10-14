@@ -169,11 +169,16 @@ tool in scope has an official Linux bottle on Homebrew.
   <url> -n <name>`, no credentials needed). The PAT needs the *Packaging →
   Read* scope. Nothing is written to disk. Runs
   last, after `install-azure-devops-git-credentials.sh`.
-- **Azure DevOps PAT storage for future custom containers** — the
-  host-side registration above uses `--authentication azcli`, which only
+- **Azure DevOps PAT storage** — note: Podman is here for general
+  container work (running services, compose stacks, building images). It is
+  **not** required for sandboxing the agent: Copilot CLI has its own
+  built-in sandbox/permission controls, so don't wrap `copilot` in a
+  container just for isolation. The MCP registration above uses
+  `--authentication azcli` (host `az login`, **no PAT**), which only
   works on the host (no `az` binary / `~/.azure` token cache inside a
-  container). For sandboxed/containerized use later (e.g. a custom Docker
-  image), store an Azure DevOps PAT as the Podman secret
+  container). The PAT below is used only by the git credential helper and
+  the NuGet provider (and any custom container that needs it later). Store
+  an Azure DevOps PAT as the Podman secret
   `azure-devops-pat`: `podman secret create azure-devops-pat -` (paste the
   PAT, then Ctrl-D; re-run to rotate). The PAT itself is expected to live
   in your own password manager (e.g. KeePass on Windows) and is never
@@ -342,6 +347,7 @@ scripts/
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
   install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
+  install-azure-functions-core-tools.sh # Azure Functions Core Tools v4 / func (brew tap azure/functions) + libicu
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
   install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command

@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 source "$SCRIPT_DIR/common.sh"
 ensure_brew_on_path
 
-if command_exists node; then
+if linux_command_exists node; then
     log_info "Node.js already installed ($(node --version)), skipping."
     exit 0
 fi

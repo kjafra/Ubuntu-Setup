@@ -14,6 +14,17 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Like command_exists, but ignores Windows binaries leaked into PATH by WSL
+# interop (/mnt/<drive>/...), which can't serve as Linux tools (e.g. a Windows
+# typescript-language-server shim shadowing the missing Linux install).
+linux_command_exists() {
+    local p
+    while IFS= read -r p; do
+        [[ "$p" != /mnt/* ]] && return 0
+    done < <(type -aP "$1" 2>/dev/null)
+    return 1
+}
+
 # Returns success if the given apt package is installed.
 apt_package_installed() {
     dpkg -s "$1" >/dev/null 2>&1
