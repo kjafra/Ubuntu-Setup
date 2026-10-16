@@ -1,7 +1,7 @@
 # Ubuntu-Setup
 
 In-distro provisioning for Ubuntu under WSL2 (the default distro used by
-[WSL-Setup](https://github.com/falwickster/WSL-Setup)). This repository is
+[WSL-Setup](https://github.com/kjafra/WSL-Setup)). This repository is
 deliberately scoped to **Linux-side setup only** — everything on the
 Windows side (registering the WSL2 distro itself, installing WezTerm) is
 handled by WSL-Setup, which pulls this repository in as a git submodule.
@@ -39,6 +39,9 @@ tool in scope has an official Linux bottle on Homebrew.
   backend (without `nft`, `podman compose up` fails with "unable to execute
   nft"); the driver is selected in the dotfiles-provided
   `.config/containers/containers.conf` (`install-firewall-tools.sh`)
+- `slirp4netns` — user-mode networking for private network namespaces;
+  required by Bubblewrap-based sandboxes (e.g. Copilot CLI's) when
+  network access is allowed, and by rootless Podman (`install-slirp4netns.sh`)
 
 **Homebrew (everything else):**
 
@@ -92,7 +95,7 @@ tool in scope has an official Linux bottle on Homebrew.
   without this fix, Homebrew's own `PATH` wiring and Podman's `DOCKER_HOST`
   wiring above would silently never take effect in a zsh login shell).
   Tools only — no shell config is written by this script.
-- The [dotfiles](https://github.com/falwickster/dotfiles) bare-repo
+- The [dotfiles](https://github.com/kjafra/dotfiles) bare-repo
   checkout (`install-dotfiles.sh`) — deploys `.zshrc`,
   `.config/lazygit/config.yml`, `.config/helix/config.toml`,
   `.config/tmux/tmux.conf`, and anything else in that repo into `$HOME`,
@@ -190,7 +193,7 @@ tool in scope has an official Linux bottle on Homebrew.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
-[dotfiles](https://github.com/falwickster/dotfiles) repo, checked out as a
+[dotfiles](https://github.com/kjafra/dotfiles) repo, checked out as a
 git submodule at `dotfiles/` in this repository purely so an AI agent (or
 you) can author/commit/push new Linux-path config files without touching a
 live `$HOME` checkout. Deployment at runtime always goes through
@@ -295,6 +298,7 @@ Or run steps individually:
 ./scripts/install-github-cli.sh
 ./scripts/install-helix.sh
 ./scripts/install-tmux.sh
+./scripts/install-slirp4netns.sh
 ./scripts/install-podman.sh
 ./scripts/install-podman-compose.sh
 ./scripts/install-delta.sh
@@ -336,6 +340,7 @@ scripts/
   install-fd.sh                # fd (brew; used by the dotfiles .zshrc as fzf's file source for Ctrl+T / Alt+C)
   install-tmux.sh              # brew (config comes from the dotfiles checkout)
   install-firewall-tools.sh    # apt nftables + iptables (netavark firewall backends)
+  install-slirp4netns.sh       # apt slirp4netns (user-mode networking for sandboxes/rootless containers)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
   install-podman-compose.sh    # podman-compose (brew)
   install-delta.sh             # git-delta (brew; config comes from the dotfiles checkout)
@@ -349,10 +354,10 @@ scripts/
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-azure-functions-core-tools.sh # Azure Functions Core Tools v4 / func (brew tap azure/functions) + libicu
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
-  install-dotfiles.sh          # bare-repo checkout of github.com/falwickster/dotfiles into $HOME
+  install-dotfiles.sh          # bare-repo checkout of github.com/kjafra/dotfiles into $HOME
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
   git-credential-azure-devops              # the helper itself, installed to ~/.local/bin
-dotfiles/                      # git submodule: github.com/falwickster/dotfiles (authoring copy, see above)
+dotfiles/                      # git submodule: github.com/kjafra/dotfiles (authoring copy, see above)
 ```

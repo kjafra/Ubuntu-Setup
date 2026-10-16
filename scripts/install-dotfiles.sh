@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Idempotently deploys github.com/falwickster/dotfiles into $HOME using the
+# Idempotently deploys github.com/kjafra/dotfiles into $HOME using the
 # bare-repo checkout pattern (see the dotfiles repo's own README): a bare
 # clone lives at $HOME/.dotfiles.git, and its worktree is $HOME itself.
 #
@@ -12,7 +12,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
 source "$SCRIPT_DIR/common.sh"
 
-DOTFILES_REPO_URL="https://github.com/falwickster/dotfiles.git"
+DOTFILES_REPO_URL="https://github.com/kjafra/dotfiles.git"
 DOTFILES_GIT_DIR="$HOME/.dotfiles.git"
 
 dotfiles_git() {

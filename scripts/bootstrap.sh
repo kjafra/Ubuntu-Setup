@@ -16,6 +16,7 @@ STEPS=(
     "install-fd.sh"
     "install-tmux.sh"
     "install-firewall-tools.sh"
+    "install-slirp4netns.sh"
     "install-podman.sh"
     "install-podman-compose.sh"
     "install-delta.sh"
