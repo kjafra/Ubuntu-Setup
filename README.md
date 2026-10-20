@@ -80,6 +80,10 @@ tool in scope has an official Linux bottle on Homebrew.
   replacement; this script only installs the binary, the `ls`/`ll`/`la`/`lt`
   aliases (with icons and git-status columns) come from the
   dotfiles-provided `.zshrc`
+- [Starship](https://starship.rs/) (`install-starship.sh`) — cross-shell prompt;
+  this script only installs the binary, the GitHub Dark High Contrast
+  theme (`.config/starship.toml`, with distinct `~`/`/` location icons) and
+  the `starship init zsh` line come from the dotfiles checkout
 - [fd](https://github.com/sharkdp/fd) (`install-fd.sh`) — fast file finder;
   the dotfiles `.zshrc` uses it as fzf's file source, so `Ctrl+T` fuzzy-picks
   files and `Alt+C` fuzzy-`cd`s (both `.gitignore`-aware). Also usable
@@ -306,6 +310,7 @@ Or run steps individually:
 ./scripts/install-lazydocker.sh
 ./scripts/install-yazi.sh
 ./scripts/install-eza.sh
+./scripts/install-starship.sh
 ./scripts/install-zsh.sh
 ./scripts/install-node.sh
 ./scripts/install-dotnet.sh
@@ -348,6 +353,7 @@ scripts/
   install-lazydocker.sh        # lazydocker (brew) + brew-services-managed rootless podman API service
   install-yazi.sh               # yazi (brew; `y` cd-on-quit wrapper comes from the dotfiles checkout)
   install-eza.sh                 # eza (brew; ls/ll/la/lt aliases come from the dotfiles checkout)
+  install-starship.sh            # starship (brew; prompt config + init come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
   install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring

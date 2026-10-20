@@ -25,6 +25,7 @@ STEPS=(
     "install-yazi.sh"
     "install-eza.sh"
     "install-zsh.sh"
+    "install-starship.sh"
     "install-node.sh"
     "install-dotnet.sh"
     "install-language-servers.sh"
