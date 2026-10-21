@@ -3,7 +3,7 @@
 #
 # This script only installs the binary. lazygit's editor preference (Helix)
 # is configured via ~/.config/lazygit/config.yml, which is deployed by the
-# dotfiles bare-repo checkout (see install-dotfiles.sh), not by this script.
+# dotfiles chezmoi deploy (see install-dotfiles.sh), not by this script.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh

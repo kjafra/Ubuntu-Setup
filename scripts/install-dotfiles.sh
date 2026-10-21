@@ -1,50 +1,74 @@
 #!/usr/bin/env bash
-# Idempotently deploys github.com/kjafra/dotfiles into $HOME using the
-# bare-repo checkout pattern (see the dotfiles repo's own README): a bare
-# clone lives at $HOME/.dotfiles.git, and its worktree is $HOME itself.
+# Idempotently deploys github.com/kjafra/dotfiles into $HOME with chezmoi.
+# chezmoi keeps its own clone of the repo in ~/.local/share/chezmoi and
+# copies files into $HOME, so $HOME is never a git work tree. Which files
+# land on Linux is decided by the repo's home/.chezmoiignore (Windows-only
+# paths are skipped).
 #
-# This script only sets up the mechanics of the checkout - it contains no
-# config content of its own. All actual config files (.zshrc,
-# .config/lazygit/config.yml, .config/helix/config.toml, etc.) live in the
-# dotfiles repo.
+# This script only sets up the mechanics - it contains no config content of
+# its own. Existing files that differ from the repo are moved to
+# ~/.dotfiles-backup/<timestamp> before being overwritten.
+#
+# Optional env: DOTFILES_REPO (default kjafra/dotfiles), DOTFILES_BRANCH.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
 source "$SCRIPT_DIR/common.sh"
 
-DOTFILES_REPO_URL="https://github.com/kjafra/dotfiles.git"
-DOTFILES_GIT_DIR="$HOME/.dotfiles.git"
+DOTFILES_REPO="${DOTFILES_REPO:-kjafra/dotfiles}"
+DOTFILES_BRANCH="${DOTFILES_BRANCH:-}"
+export PATH="$HOME/.local/bin:$PATH"
 
-dotfiles_git() {
-    git --git-dir="$DOTFILES_GIT_DIR" --work-tree="$HOME" "$@"
-}
-
-if [[ -d "$DOTFILES_GIT_DIR" ]]; then
-    log_info "dotfiles bare repo already present at $DOTFILES_GIT_DIR, skipping clone."
+if command_exists chezmoi; then
+    log_info "chezmoi already installed ($(chezmoi --version | cut -d, -f1))."
 else
-    log_info "Cloning dotfiles bare repo from $DOTFILES_REPO_URL to $DOTFILES_GIT_DIR..."
-    if ! git clone --bare "$DOTFILES_REPO_URL" "$DOTFILES_GIT_DIR"; then
-        log_err "Failed to clone $DOTFILES_REPO_URL."
+    log_info "Installing chezmoi to ~/.local/bin (official installer, checksum-verified)..."
+    if ! sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"; then
+        log_err "Failed to install chezmoi."
         exit 1
     fi
-    dotfiles_git config --local status.showUntrackedFiles no
 fi
 
-# The dotfiles repo is shared with Windows; its tracked .sparse/ubuntu
-# denylist (everything except Windows-only paths) decides what is checked out.
-log_info "Restricting checkout via .sparse/ubuntu (sparse-checkout)..."
-if ! dotfiles_git show HEAD:.sparse/ubuntu | dotfiles_git sparse-checkout set --no-cone --stdin; then
-    log_err ".sparse/ubuntu missing from dotfiles repo HEAD or sparse-checkout failed."
-    exit 1
-fi
-
-log_info "Checking out dotfiles into $HOME..."
-if dotfiles_git checkout; then
-    log_ok "dotfiles checked out into $HOME."
+if [[ -d "${XDG_DATA_HOME:-$HOME/.local/share}/chezmoi/.git" ]]; then
+    log_info "chezmoi source already present, skipping init."
 else
-    log_err "dotfiles checkout reported conflicts (existing files would be overwritten)."
-    log_err "Resolve manually: back up or remove the conflicting files listed above, then re-run this script."
+    log_info "Initialising chezmoi from $DOTFILES_REPO..."
+    init_args=("$DOTFILES_REPO")
+    [[ -n "$DOTFILES_BRANCH" ]] && init_args+=(--branch "$DOTFILES_BRANCH")
+    if ! chezmoi init "${init_args[@]}"; then
+        log_err "chezmoi init failed."
+        exit 1
+    fi
+fi
+
+# Back up managed files that exist locally but differ from the repo.
+backup="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
+while IFS= read -r line; do
+    [[ -z "$line" || "${line:1:1}" == " " ]] && continue
+    rel="${line:3}"
+    [[ -f "$HOME/$rel" ]] || continue
+    mkdir -p "$backup/$(dirname "$rel")"
+    cp -a "$HOME/$rel" "$backup/$rel"
+    log_warn "Backed up $rel -> $backup/$rel"
+done < <(chezmoi status)
+
+log_info "Applying dotfiles into $HOME..."
+if ! chezmoi apply --force; then
+    log_err "chezmoi apply failed. Inspect with 'chezmoi diff'."
     exit 1
 fi
 
-log_ok "dotfiles deployed. Use the 'dotfiles' shell function (pull/fetch/merge/status/log/diff) to sync future updates."
+# Identity/credential helpers are machine-specific and not managed.
+if [[ ! -e "$HOME/.gitconfig.local" && -e "$HOME/.gitconfig.local.example" ]]; then
+    cp "$HOME/.gitconfig.local.example" "$HOME/.gitconfig.local"
+    log_warn "Created ~/.gitconfig.local from the example - fill in your name/email/credential helpers."
+fi
+
+# Retire the legacy bare-repo checkout once chezmoi has applied cleanly.
+if [[ -d "$HOME/.dotfiles.git" ]]; then
+    mkdir -p "$HOME/.dotfiles-backup"
+    mv "$HOME/.dotfiles.git" "$HOME/.dotfiles-backup/legacy-dotfiles.git"
+    log_warn "Moved legacy ~/.dotfiles.git to ~/.dotfiles-backup/legacy-dotfiles.git."
+fi
+
+log_ok "dotfiles deployed. Use the 'dotfiles' shell function (pull/diff/apply/status/verify) to sync future updates."

@@ -99,8 +99,8 @@ tool in scope has an official Linux bottle on Homebrew.
   without this fix, Homebrew's own `PATH` wiring and Podman's `DOCKER_HOST`
   wiring above would silently never take effect in a zsh login shell).
   Tools only — no shell config is written by this script.
-- The [dotfiles](https://github.com/kjafra/dotfiles) bare-repo
-  checkout (`install-dotfiles.sh`) — deploys `.zshrc`,
+- The [dotfiles](https://github.com/kjafra/dotfiles) chezmoi
+  deploy (`install-dotfiles.sh`) — deploys `.zshrc`,
   `.config/lazygit/config.yml`, `.config/helix/config.toml`,
   `.config/tmux/tmux.conf`, and anything else in that repo into `$HOME`,
   mirroring the same experience as the Windows PowerShell profile:
@@ -110,13 +110,13 @@ tool in scope has an official Linux bottle on Homebrew.
   keybindings, `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
   git-status columns, a `y` shell function that opens Yazi and `cd`s to
   its last directory on quit, and a locked-down `dotfiles` shell function
-  (`pull`/`fetch`/`merge`/`status`/`log`/`diff` only) for syncing future
-  updates
+  (`pull`/`diff`/`apply`/`status`/`verify`/`managed`/`doctor` only, a chezmoi
+  wrapper) for syncing future updates
 - A global git `commit-msg` hook that rejects any commit crediting
   Copilot (or another AI assistant) as a co-author (see
   [Preventing AI co-author trailers](#preventing-ai-co-author-trailers)
   below). Deployed to `$HOME/.git-hooks/commit-msg` by the dotfiles
-  checkout (`install-dotfiles.sh`).
+  deploy (`install-dotfiles.sh`).
 - [Node.js](https://nodejs.org/) (`install-node.sh`) — only used for the
   `npx`-launched MCP servers below; no app code or shell config depends
   on it.
@@ -149,7 +149,7 @@ tool in scope has an official Linux bottle on Homebrew.
   generated or written to disk. Runs last, after `install-node.sh` and
   `install-copilot-cli.sh`. Org names are personal/machine-specific, so
   they're **not** tracked in the dotfiles repo: copy
-  `dotfiles/.azure-devops.local.example` to `~/.azure-devops.local` and
+  `~/.azure-devops.local.example` (deployed by chezmoi) to `~/.azure-devops.local` and
   list one org per line (if that file is missing or only has placeholder
   org names, the script logs instructions and skips cleanly instead of
   failing). Re-run the script after adding a new org — it only registers
@@ -201,7 +201,10 @@ install/enable *tools*; all actual config content lives in the
 git submodule at `dotfiles/` in this repository purely so an AI agent (or
 you) can author/commit/push new Linux-path config files without touching a
 live `$HOME` checkout. Deployment at runtime always goes through
-`install-dotfiles.sh`'s bare-repo checkout, not this submodule.
+`install-dotfiles.sh` (chezmoi, which keeps its own clone in
+`~/.local/share/chezmoi`), not this submodule. Which files land on Linux is
+decided by the dotfiles repo's `home/.chezmoiignore` (denylist of Windows-only
+paths), so new Linux tool configs need no script edits.
 
 ## Login banner & manual-setup reminders
 
@@ -360,7 +363,7 @@ scripts/
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-azure-functions-core-tools.sh # Azure Functions Core Tools v4 / func (brew tap azure/functions) + libicu
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
-  install-dotfiles.sh          # bare-repo checkout of github.com/kjafra/dotfiles into $HOME
+  install-dotfiles.sh          # chezmoi deploy of github.com/kjafra/dotfiles into $HOME
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)

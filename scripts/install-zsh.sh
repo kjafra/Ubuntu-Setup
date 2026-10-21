@@ -6,7 +6,7 @@
 #
 # This script only installs and enables tools - it writes no shell config.
 # All config content (.zshrc, key bindings, plugin sourcing) is deployed via
-# the dotfiles bare-repo checkout; see install-dotfiles.sh.
+# the dotfiles chezmoi deploy; see install-dotfiles.sh.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh

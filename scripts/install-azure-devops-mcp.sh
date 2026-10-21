@@ -16,7 +16,7 @@
 # org listed gets its own MCP server (named "azure-devops-<org>"),
 # registered simultaneously - no switching required, all orgs' tools are
 # available to Copilot at once. Copy
-# dotfiles/.azure-devops.local.example to $HOME/.azure-devops.local and
+# ~/.azure-devops.local.example (deployed by chezmoi) to $HOME/.azure-devops.local and
 # fill in your org name(s) before running this script. If that file
 # doesn't exist yet, or has no real org names set, this script logs
 # instructions and exits 0 (skipped, not failed), so
@@ -53,7 +53,7 @@ fi
 
 if [[ ! -f "$ADO_ORG_FILE" ]]; then
     log_warn "Azure DevOps organization(s) not configured."
-    log_warn "Copy dotfiles/.azure-devops.local.example to ${ADO_ORG_FILE} and fill in your org name(s), then re-run this script."
+    log_warn "Copy ~/.azure-devops.local.example to ${ADO_ORG_FILE} and fill in your org name(s), then re-run this script."
     exit 0
 fi
 

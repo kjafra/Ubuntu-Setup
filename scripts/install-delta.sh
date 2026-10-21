@@ -3,7 +3,7 @@
 # as core.pager in the dotfiles-provided .gitconfig.
 #
 # This script only installs the binary - the .gitconfig that points
-# core.pager at delta comes from the dotfiles bare-repo checkout, not
+# core.pager at delta comes from the dotfiles chezmoi deploy, not
 # from this script.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
