@@ -30,6 +30,14 @@ else
     dotfiles_git config --local status.showUntrackedFiles no
 fi
 
+# The dotfiles repo is shared with Windows; its tracked .sparse/ubuntu
+# denylist (everything except Windows-only paths) decides what is checked out.
+log_info "Restricting checkout via .sparse/ubuntu (sparse-checkout)..."
+if ! dotfiles_git show HEAD:.sparse/ubuntu | dotfiles_git sparse-checkout set --no-cone --stdin; then
+    log_err ".sparse/ubuntu missing from dotfiles repo HEAD or sparse-checkout failed."
+    exit 1
+fi
+
 log_info "Checking out dotfiles into $HOME..."
 if dotfiles_git checkout; then
     log_ok "dotfiles checked out into $HOME."
