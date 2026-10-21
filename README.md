@@ -4,7 +4,8 @@ In-distro provisioning for Ubuntu under WSL2 (the default distro used by
 [WSL-Setup](https://github.com/kjafra/WSL-Setup)). This repository is
 deliberately scoped to **Linux-side setup only** — everything on the
 Windows side (registering the WSL2 distro itself, installing WezTerm) is
-handled by WSL-Setup, which pulls this repository in as a git submodule.
+handled by WSL-Setup. This repository is maintained separately and cloned
+inside the distro.
 
 Same design pattern as WSL-Setup, just in shell instead of PowerShell:
 
@@ -197,12 +198,10 @@ tool in scope has an official Linux bottle on Homebrew.
 
 This repo intentionally keeps a strict split: install scripts here only
 install/enable *tools*; all actual config content lives in the
-[dotfiles](https://github.com/kjafra/dotfiles) repo, checked out as a
-git submodule at `dotfiles/` in this repository purely so an AI agent (or
-you) can author/commit/push new Linux-path config files without touching a
-live `$HOME` checkout. Deployment at runtime always goes through
+[dotfiles](https://github.com/kjafra/dotfiles) repo, which is maintained
+separately (no submodule). Deployment goes through
 `install-dotfiles.sh` (chezmoi, which keeps its own clone in
-`~/.local/share/chezmoi`), not this submodule. Which files land on Linux is
+`~/.local/share/chezmoi`; use `chezmoi cd` to author/commit changes). Which files land on Linux is
 decided by the dotfiles repo's `home/.chezmoiignore` (denylist of Windows-only
 paths), so new Linux tool configs need no script edits.
 
@@ -368,5 +367,4 @@ scripts/
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
   git-credential-azure-devops              # the helper itself, installed to ~/.local/bin
-dotfiles/                      # git submodule: github.com/kjafra/dotfiles (authoring copy, see above)
 ```
