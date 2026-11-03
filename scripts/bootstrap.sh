@@ -31,6 +31,7 @@ STEPS=(
     "install-language-servers.sh"
     "install-azure-cli.sh"
     "install-azure-functions-core-tools.sh"
+    "install-dapr-cli.sh"
     "install-dotfiles.sh"
     "install-copilot-cli.sh"
     "install-azure-devops-mcp.sh"

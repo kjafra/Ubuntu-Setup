@@ -14,17 +14,23 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
 source "$SCRIPT_DIR/common.sh"
+ensure_brew_on_path
 
 DOTFILES_REPO="${DOTFILES_REPO:-kjafra/dotfiles}"
 DOTFILES_BRANCH="${DOTFILES_BRANCH:-}"
 export PATH="$HOME/.local/bin:$PATH"
 
-if command_exists chezmoi; then
+if [[ -x "$HOME/.local/bin/chezmoi" ]]; then
+    log_info "Removing legacy curl-installed chezmoi from ~/.local/bin..."
+    rm -f "$HOME/.local/bin/chezmoi"
+fi
+
+if brew list chezmoi >/dev/null 2>&1; then
     log_info "chezmoi already installed ($(chezmoi --version | cut -d, -f1))."
 else
-    log_info "Installing chezmoi to ~/.local/bin (official installer, checksum-verified)..."
-    if ! sh -c "$(curl -fsLS get.chezmoi.io)" -- -b "$HOME/.local/bin"; then
-        log_err "Failed to install chezmoi."
+    log_info "Installing chezmoi via Homebrew..."
+    if ! brew install chezmoi; then
+        log_err "brew install chezmoi failed."
         exit 1
     fi
 fi

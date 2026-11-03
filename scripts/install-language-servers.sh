@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Idempotently installs the language servers Helix uses for this repo's
-# primary languages: C# (csharp-ls), TypeScript (typescript-language-server)
-# and YAML (yaml-language-server). Requires install-dotnet.sh and
-# install-node.sh to have already run.
+# primary languages: C# (csharp-ls, dotnet global tool - no brew formula),
+# TypeScript (typescript-language-server) and YAML (yaml-language-server),
+# the latter two via Homebrew. Requires install-dotnet.sh to have run.
 set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
@@ -11,10 +11,6 @@ ensure_brew_on_path
 
 if ! command_exists dotnet; then
     log_err "dotnet not found on PATH. Run install-dotnet.sh first."
-    exit 1
-fi
-if ! linux_command_exists npm; then
-    log_err "npm not found on PATH. Run install-node.sh first."
     exit 1
 fi
 
@@ -54,28 +50,27 @@ export PATH="$HOME/.dotnet/tools:$PATH"
 mkdir -p "$HOME/.local/bin"
 ln -sf "$HOME/.dotnet/tools/csharp-ls" "$HOME/.local/bin/csharp-ls"
 
-# typescript-language-server + typescript (TypeScript/JavaScript).
-if linux_command_exists typescript-language-server; then
-    log_info "typescript-language-server already installed, skipping."
-else
-    log_info "Installing typescript-language-server via npm..."
-    if ! npm install -g typescript-language-server typescript; then
-        log_err "npm install -g typescript-language-server typescript failed."
-        exit 1
-    fi
-    log_ok "typescript-language-server installed."
+# typescript-language-server + typescript and yaml-language-server via brew.
+# Remove legacy npm -g copies first so they don't conflict with brew's links.
+if linux_command_exists npm; then
+    for pkg in typescript-language-server typescript yaml-language-server; do
+        if npm ls -g --depth=0 "$pkg" >/dev/null 2>&1; then
+            log_info "Removing legacy npm global $pkg..."
+            npm uninstall -g "$pkg" || log_warn "npm uninstall -g $pkg failed."
+        fi
+    done
 fi
 
-# yaml-language-server (YAML).
-if linux_command_exists yaml-language-server; then
-    log_info "yaml-language-server already installed, skipping."
-else
-    log_info "Installing yaml-language-server via npm..."
-    if ! npm install -g yaml-language-server; then
-        log_err "npm install -g yaml-language-server failed."
-        exit 1
+for formula in typescript-language-server yaml-language-server; do
+    if brew list "$formula" >/dev/null 2>&1; then
+        log_info "$formula already installed, skipping."
+    else
+        log_info "Installing $formula via Homebrew..."
+        if ! brew install "$formula"; then
+            log_err "brew install $formula failed."
+            exit 1
+        fi
     fi
-    log_ok "yaml-language-server installed."
-fi
+done
 
 log_ok "Language servers installed: csharp-ls, typescript-language-server, yaml-language-server."

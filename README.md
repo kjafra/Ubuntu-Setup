@@ -129,12 +129,16 @@ tool in scope has an official Linux bottle on Homebrew.
   — this script only installs the `az` binary, it does **not** run
   `az login` (interactive/credentialed — left to the login-banner
   reminder below, same as the GitHub CLI's).
+- [Dapr CLI](https://docs.dapr.io/getting-started/install-dapr-cli/)
+  (`install-dapr-cli.sh`, brew `dapr/tap/dapr-cli`) — installs only the
+  `dapr` binary; run `dapr init --container-runtime podman` yourself to
+  set up the local runtime.
 - The standalone [GitHub Copilot CLI](https://github.com/github/copilot-cli)
   (`install-copilot-cli.sh`, the `copilot` command) — unlike the `gh
   copilot` built-in (`install-github-cli.sh`), this is the full agentic
-  CLI with MCP server support (`/mcp`, `copilot mcp add`). No Linux
-  Homebrew cask exists for it, so this installs it via GitHub's own
-  official install script into `$HOME/.local/bin`. Requires `gh`/Copilot authentication (via the
+  CLI with MCP server support (`/mcp`, `copilot mcp add`). Installed
+  via the Homebrew `copilot-cli` formula (any legacy curl-installed copy in
+  `$HOME/.local/bin` is removed). Requires `gh`/Copilot authentication (via the
   in-app `/login` flow) before first use — not run automatically by this
   script.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
@@ -317,6 +321,7 @@ Or run steps individually:
 ./scripts/install-node.sh
 ./scripts/install-dotnet.sh
 ./scripts/install-azure-cli.sh
+./scripts/install-dapr-cli.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-azure-devops-mcp.sh
@@ -332,14 +337,27 @@ automatically).
 Re-running any script (or `install.sh` as a whole) is safe — already
 installed tools are detected and skipped.
 
+## Updating everything
+
+```bash
+./update.sh
+```
+
+Runs `scripts/update-all.sh`: `apt-get upgrade`, `brew update && brew upgrade
+--greedy && brew cleanup`, `dotnet tool update -g csharp-ls`, and re-runs the
+Azure Artifacts Credential Provider installer (neither has a brew package).
+A failing section is reported at the end without stopping the others.
+
 ## Repository layout
 
 ```
 install.sh                     # Entry point, delegates to scripts/bootstrap.sh
+update.sh                      # Updates everything, delegates to scripts/update-all.sh
 scripts/
   bootstrap.sh                 # Runs every install script in order
   common.sh                    # Shared helpers (logging, command/package checks, sudo hints, brew PATH)
   update-base-packages.sh      # apt-get update && apt-get upgrade
+  update-all.sh                # apt + brew upgrade --greedy + csharp-ls + NuGet credential provider
   install-git.sh
   install-homebrew.sh          # Homebrew (Linuxbrew) itself + its apt build deps + PATH wiring
   install-github-cli.sh        # gh + gh copilot extension (brew)
@@ -361,9 +379,10 @@ scripts/
   install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-azure-functions-core-tools.sh # Azure Functions Core Tools v4 / func (brew tap azure/functions) + libicu
+  install-dapr-cli.sh            # Dapr CLI / dapr (brew dapr/tap/dapr-cli) - `dapr init` left to the user
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
   install-dotfiles.sh          # chezmoi deploy of github.com/kjafra/dotfiles into $HOME
-  install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew-free; upstream's own installer) - MCP-capable `copilot` command
+  install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew) - MCP-capable `copilot` command
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
   git-credential-azure-devops              # the helper itself, installed to ~/.local/bin

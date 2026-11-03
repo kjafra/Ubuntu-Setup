@@ -4,10 +4,9 @@
 # full agentic CLI that supports MCP servers (`/mcp`, `copilot mcp add`,
 # etc.), unlike the older `gh copilot` built-in (install-github-cli.sh).
 #
-# There's no Homebrew cask for this on Linux (the official `copilot-cli`
-# cask is macOS-only), so this uses GitHub's own official install script.
-# It defaults to $HOME/.local/bin for a non-root user, which is already
-# added to PATH by the dotfiles-provided .zshrc.
+# Installed via the Homebrew `copilot-cli` formula so `brew upgrade` keeps it
+# current. A previous curl-installed copy in ~/.local/bin is removed so it
+# can't shadow the brew one.
 #
 # Requires `gh` to be authenticated (or the /login flow on first launch)
 # before first use - not run automatically by this script. MCP servers
@@ -19,18 +18,23 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 # shellcheck source=./common.sh
 source "$SCRIPT_DIR/common.sh"
 
-COPILOT_CLI_BIN="$HOME/.local/bin/copilot"
-COPILOT_CLI_INSTALL_URL="https://gh.io/copilot-install"
+ensure_brew_on_path
 
-if command_exists copilot || [[ -x "$COPILOT_CLI_BIN" ]]; then
-    log_info "GitHub Copilot CLI already installed ($("$COPILOT_CLI_BIN" --version 2>/dev/null || copilot --version 2>/dev/null || echo 'version unknown')), skipping install."
+COPILOT_CLI_BIN="$HOME/.local/bin/copilot"
+
+if [[ -e "$COPILOT_CLI_BIN" ]]; then
+    log_info "Removing legacy curl-installed copilot at $COPILOT_CLI_BIN..."
+    rm -rf "$COPILOT_CLI_BIN"
+fi
+
+if brew list copilot-cli >/dev/null 2>&1; then
+    log_info "GitHub Copilot CLI already installed via Homebrew, skipping install."
     exit 0
 fi
 
-log_info "Installing GitHub Copilot CLI from ${COPILOT_CLI_INSTALL_URL}..."
-# shellcheck disable=SC1090
-if ! curl -fsSL "$COPILOT_CLI_INSTALL_URL" | bash; then
-    log_err "GitHub Copilot CLI install failed."
+log_info "Installing GitHub Copilot CLI via Homebrew..."
+if ! brew install copilot-cli; then
+    log_err "brew install copilot-cli failed."
     exit 1
 fi
 
