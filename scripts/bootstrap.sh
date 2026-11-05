@@ -34,6 +34,7 @@ STEPS=(
     "install-dapr-cli.sh"
     "install-dotfiles.sh"
     "install-copilot-cli.sh"
+    "install-herdr.sh"
     "install-azure-devops-mcp.sh"
     "install-azure-devops-git-credentials.sh"
     "install-nuget-credential-provider.sh"

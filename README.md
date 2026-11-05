@@ -141,6 +141,11 @@ tool in scope has an official Linux bottle on Homebrew.
   `$HOME/.local/bin` is removed). Requires `gh`/Copilot authentication (via the
   in-app `/login` flow) before first use — not run automatically by this
   script.
+- [herdr](https://herdr.dev/tui/) (`install-herdr.sh`) — terminal agent
+  multiplexer, installed via the Homebrew `herdr` formula. Also runs
+  `herdr integration install copilot` (a `SessionStart` hook in
+  `~/.copilot/settings.json`) so herdr can resume Copilot CLI sessions
+  after a restart; skipped with a warning if `copilot` isn't installed yet.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
   (`install-azure-devops-mcp.sh`) — registers Microsoft's official
   `@azure-devops/mcp` server with the Copilot CLI above. **Supports
@@ -324,6 +329,7 @@ Or run steps individually:
 ./scripts/install-dapr-cli.sh
 ./scripts/install-dotfiles.sh
 ./scripts/install-copilot-cli.sh
+./scripts/install-herdr.sh
 ./scripts/install-azure-devops-mcp.sh
 ./scripts/install-azure-devops-git-credentials.sh
 ```
@@ -383,6 +389,7 @@ scripts/
   install-nuget-credential-provider.sh # Azure Artifacts credential provider (~/.nuget/plugins) + jq
   install-dotfiles.sh          # chezmoi deploy of github.com/kjafra/dotfiles into $HOME
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew) - MCP-capable `copilot` command
+  install-herdr.sh             # herdr (brew) + its Copilot CLI session-resume integration
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
   git-credential-azure-devops              # the helper itself, installed to ~/.local/bin
