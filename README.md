@@ -52,12 +52,6 @@ tool in scope has an official Linux bottle on Homebrew.
 - GitHub CLI (`gh`) + the GitHub Copilot CLI extension (`gh copilot`)
   (`install-github-cli.sh`)
 - [Helix](https://helix-editor.com/) editor (`install-helix.sh`)
-- [tmux](https://github.com/tmux/tmux) (`install-tmux.sh`) — this script
-  only installs the binary; visuals/behavior (translucent Omarchy-inspired
-  theme, default emacs-style keybindings, no plugins) come from the
-  dotfiles-provided `.config/tmux/tmux.conf`. Run it manually with `tmux`
-  whenever you want it — it's not auto-started on login, and session
-  handling (detach, re-attach, kill) is tmux's own default behavior
 - [Podman](https://podman.io/) (`install-podman.sh`)
 - [podman-compose](https://github.com/containers/podman-compose)
   (`install-podman-compose.sh`) — compose provider for `podman compose`
@@ -103,12 +97,10 @@ tool in scope has an official Linux bottle on Homebrew.
 - The [dotfiles](https://github.com/kjafra/dotfiles) chezmoi
   deploy (`install-dotfiles.sh`) — deploys `.zshrc`,
   `.config/lazygit/config.yml`, `.config/helix/config.toml`,
-  `.config/tmux/tmux.conf`, and anything else in that repo into `$HOME`,
+  `.config/herdr/config.toml`, and anything else in that repo into `$HOME`,
   mirroring the same experience as the Windows PowerShell profile:
   fzf-powered `Ctrl+R` history search, ghost-text history autosuggestions,
-  Helix as the default editor (`$EDITOR`/`$VISUAL`, so also Copilot CLI's prompt editor) for lazygit/git, a translucent
-  Omarchy-inspired tmux status bar/pane theme with tmux's stock
-  keybindings, `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
+  Helix as the default editor (`$EDITOR`/`$VISUAL`, so also Copilot CLI's prompt editor) for lazygit/git, `eza`-powered `ls`/`ll`/`la`/`lt` aliases with icons and
   git-status columns, a `y` shell function that opens Yazi and `cd`s to
   its last directory on quit, and a locked-down `dotfiles` shell function
   (`pull`/`diff`/`apply`/`status`/`verify`/`managed`/`doctor` only, a chezmoi
@@ -146,6 +138,9 @@ tool in scope has an official Linux bottle on Homebrew.
   `herdr integration install copilot` (a `SessionStart` hook in
   `~/.copilot/settings.json`) so herdr can resume Copilot CLI sessions
   after a restart; skipped with a warning if `copilot` isn't installed yet.
+- [OpenSpec](https://openspec.dev/) (`install-openspec.sh`) — spec-driven
+  development CLI for AI coding assistants, via the Homebrew `openspec`
+  formula. Run `openspec init` inside a project to start using it.
 - The [Azure DevOps MCP server](https://github.com/microsoft/azure-devops-mcp)
   (`install-azure-devops-mcp.sh`) — registers Microsoft's official
   `@azure-devops/mcp` server with the Copilot CLI above. **Supports
@@ -280,10 +275,7 @@ Reopen the Ubuntu terminal and re-run `brew services start podman`.
 
 The dotfiles-provided `.zshrc` binds Ctrl+Left/Right to zsh's
 `forward-word`/`backward-word` (covering the handful of escape-sequence
-encodings xterm-compatible terminals actually send), and
-`.config/tmux/tmux.conf` sets `xterm-keys on` so tmux forwards those
-modified-arrow sequences through to the shell unmangled instead of
-swallowing/mistranslating them.
+encodings xterm-compatible terminals actually send).
 
 ## Preventing AI co-author trailers
 
@@ -312,7 +304,6 @@ Or run steps individually:
 ./scripts/install-homebrew.sh
 ./scripts/install-github-cli.sh
 ./scripts/install-helix.sh
-./scripts/install-tmux.sh
 ./scripts/install-slirp4netns.sh
 ./scripts/install-podman.sh
 ./scripts/install-podman-compose.sh
@@ -330,6 +321,7 @@ Or run steps individually:
 ./scripts/install-dotfiles.sh
 ./scripts/install-copilot-cli.sh
 ./scripts/install-herdr.sh
+./scripts/install-openspec.sh
 ./scripts/install-azure-devops-mcp.sh
 ./scripts/install-azure-devops-git-credentials.sh
 ```
@@ -369,7 +361,6 @@ scripts/
   install-github-cli.sh        # gh + gh copilot extension (brew)
   install-helix.sh             # brew
   install-fd.sh                # fd (brew; used by the dotfiles .zshrc as fzf's file source for Ctrl+T / Alt+C)
-  install-tmux.sh              # brew (config comes from the dotfiles checkout)
   install-firewall-tools.sh    # apt nftables + iptables (netavark firewall backends)
   install-slirp4netns.sh       # apt slirp4netns (user-mode networking for sandboxes/rootless containers)
   install-podman.sh            # brew + apt uidmap (rootless UID/GID mapping)
@@ -390,6 +381,7 @@ scripts/
   install-dotfiles.sh          # chezmoi deploy of github.com/kjafra/dotfiles into $HOME
   install-copilot-cli.sh       # standalone GitHub Copilot CLI (brew) - MCP-capable `copilot` command
   install-herdr.sh             # herdr (brew) + its Copilot CLI session-resume integration
+  install-openspec.sh          # openspec (brew)
   install-azure-devops-mcp.sh  # registers the Azure DevOps MCP server with Copilot CLI (`copilot mcp add`), runs last
   install-azure-devops-git-credentials.sh  # dev.azure.com-only git credential helper (PAT from Podman secret)
   git-credential-azure-devops              # the helper itself, installed to ~/.local/bin
