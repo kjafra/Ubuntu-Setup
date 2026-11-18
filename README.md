@@ -114,8 +114,9 @@ tool in scope has an official Linux bottle on Homebrew.
   `npx`-launched MCP servers below; no app code or shell config depends
   on it.
 - [.NET 10 SDK](https://dotnet.microsoft.com/) (`install-dotnet.sh`) — the
-  Homebrew `dotnet` formula is aka'd `dotnet@10` upstream (tracks the .NET
-  10 channel); also writes `DOTNET_ROOT` via a static `/etc/profile.d/`
+  versioned Homebrew `dotnet@10` formula (keg-only, force-linked) keeps
+  `brew upgrade` on 10.x instead of jumping to the newer-major `dotnet`
+  formula; any unversioned `dotnet` is uninstalled; also writes `DOTNET_ROOT` via a static `/etc/profile.d/`
   file, same pattern as Podman's `DOCKER_HOST` above.
 - [Azure CLI](https://learn.microsoft.com/cli/azure/) (`install-azure-cli.sh`)
   — this script only installs the `az` binary, it does **not** run
@@ -373,7 +374,7 @@ scripts/
   install-starship.sh            # starship (brew; prompt config + init come from the dotfiles checkout)
   install-zsh.sh                # zsh + fzf + zsh-autosuggestions + zsh-syntax-highlighting (brew), login shell, /etc/zprofile fix
   install-node.sh                # Node.js + npx (brew) - needed to launch npx-based MCP servers
-  install-dotnet.sh              # .NET 10 SDK (brew `dotnet` formula, aka dotnet@10) + DOTNET_ROOT /etc/profile.d wiring
+  install-dotnet.sh              # .NET 10 SDK (brew `dotnet@10` formula) + DOTNET_ROOT /etc/profile.d wiring
   install-azure-cli.sh           # Azure CLI / az (brew) - auth left to the user (`az login`)
   install-azure-functions-core-tools.sh # Azure Functions Core Tools v4 / func (brew tap azure/functions) + libicu
   install-dapr-cli.sh            # Dapr CLI / dapr (brew dapr/tap/dapr-cli) - `dapr init` left to the user
